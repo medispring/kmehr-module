@@ -1,0 +1,50 @@
+pullPolicy: "IfNotPresent"
+
+couchdbUrl: "http://couchdb-svc-couchdb.couch"
+couchdbPortNumber: 5984
+
+ingressClassName: "haproxy"
+#tls:
+#    -   secretName: tls-example-com
+#        hosts:
+#            - one.example.com
+#            - two.example.com
+
+images:
+    kmehr:
+        repository: "docker.taktik.be/icure/icure-kmehr-module"
+        tag: "" # helm install
+        replicaCount: 1
+        javaOpts: "" # config
+        memoryRequest: "4096M"
+        memoryLimit: "4096M"
+        cpuRequest: 100m
+        cpuLimit: 2
+        servicePort: 16043
+        debug: true
+        virtualHosts: []
+        readiness: true
+        liveness: true
+        env:
+            ICURE_COUCHDB_PREFIX: "icure-__"
+            ICURE_COUCHDB_ENFORCE: "TRUE"
+            ICURE_SYNC_GLOBAL_DATABASES: "TRUE"
+
+    sam:
+        repository: "docker.taktik.be/icure/icure-kmehr-module"
+        tag: "" # helm install
+        replicaCount: 1
+        javaOpts: "" # config
+        memoryRequest: "4096M"
+        memoryLimit: "4096M"
+        cpuRequest: 100m
+        cpuLimit: 2
+        servicePort: 16043
+        debug: true
+        virtualHosts: [ ]
+        readiness: true
+        liveness: true
+        env:
+            ICURE_COUCHDB_PREFIX: "icure-__"
+            ICURE_COUCHDB_ENFORCE: "TRUE"
+            ICURE_SYNC_GLOBAL_DATABASES: "TRUE"

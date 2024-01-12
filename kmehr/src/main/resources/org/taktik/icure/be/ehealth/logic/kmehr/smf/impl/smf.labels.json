@@ -1,0 +1,323 @@
+{
+  "intubationrefusal": [
+    {
+      "label": {
+        "fr": "Refus d'intubation"
+      }
+    }
+  ],
+  "ntbr": [
+    {
+      "label": {
+        "fr": "Refus de réanimation"
+      }
+    }
+  ],
+  "bloodtransfusionrefusal": [
+    {
+      "label": {
+        "fr": "Refus de transfusion sanguine"
+      }
+    }
+  ],
+  "euthanasiarequest": [
+    {
+      "label": {
+        "fr": "Demande d'euthanasie"
+      }
+    }
+  ],
+  "clinicaltrialparticipationconsent": [
+    {
+      "label": {
+        "fr": "Consentement pour une participation à des essais cliniques"
+      }
+    }
+  ],
+  "datareuseforclinicalresearchconsent": [
+    {
+      "label": {
+        "fr": "Consentement pour l'utilisation de données lors de recherches cliniques"
+      }
+    }
+  ],
+  "datareuseforclinicaltrialsconsent": [
+    {
+      "label": {
+        "fr": "Consentement pour l'utilisation de données lors d'essais cliniques"
+      }
+    }
+  ],
+  "organdonationconsent": [
+    {
+      "label": {
+        "fr": "Donneur d'organe"
+      }
+    }
+  ],
+  "vaccinationrefusal": [
+    {
+      "label": {
+        "fr": "Refus de se faire vacciner"
+      }
+    }
+  ],
+  "risk": [
+    {
+      "label": {
+        "fr": "Facteurs de risque"
+      }
+    }
+  ],
+  "diagnostic": [
+    {
+      "label": {
+        "fr": "Diagnostics"
+      },
+      "tags": [
+        {
+          "type": "CD-ITEM",
+          "code": "diagnosis",
+          "version": "1"
+        }
+      ]
+    }
+  ],
+  "diagnosis": [
+    {
+      "label": {
+        "fr": "Diagnostics"
+      }
+    }
+  ],
+  "conclusion": [
+    {
+      "label": {
+        "fr": "Diagnostics"
+      }
+    }
+  ],
+  "healthissue": [
+    {
+      "label": {
+        "fr": "Problème de soin"
+      }
+    }
+  ],
+  "transactionreason": [
+    {
+      "label": {
+        "fr": "Motifs de contact"
+      }
+    }
+  ],
+  "allergy": [
+    {
+      "label": {
+        "fr": "Allergies"
+      }
+    }
+  ],
+  "adr": [
+    {
+      "label": {
+        "fr": "Facteurs de risque social"
+      }
+    }
+  ],
+  "complaint": [
+    {
+      "label": {
+        "fr": "Motifs de contact"
+      }
+    }
+  ],
+  "clinical": [
+    {
+      "label": {
+        "fr": "Examen clinique"
+      }
+    }
+  ],
+  "medication": [
+    {
+      "label": {
+        "fr": "Traitements médicamenteux"
+      }
+    }
+  ],
+  "vaccine": [
+    {
+      "lifecycle": "planned",
+      "label": {
+        "fr": "Vaccination à prévoir"
+      }
+    },
+    {
+      "label": {
+        "fr": "Vaccination"
+      }
+    }
+  ],
+  "treatment": [
+    {
+      "lifecycle": "planned",
+      "label": {
+        "fr": "Prescription à faire"
+      }
+    },
+    {
+      "label": {
+        "fr": "Prescription"
+      }
+    },
+    {
+      "lifecycle": "planned",
+      "label": {
+        "fr": "Actes plannifiés"
+      }
+    },
+    {
+      "label": {
+        "fr": "Traitements non-médicamenteux"
+      }
+    }
+  ],
+  "actionplan": [
+    {
+      "lifecycle": "planned",
+      "label": {
+        "fr": "Actes plannifiés"
+      }
+    },
+    {
+      "label": {
+        "fr": "Traitements non-médicamenteux"
+      }
+    }
+  ],
+  "referral": [
+    {
+      "label": {
+        "fr": "Demande d'avis"
+      }
+    }
+  ],
+  "socialrisk": [
+    {
+      "label": {
+        "fr": "Facteurs de risque social"
+      }
+    }
+  ],
+  "professionalrisk": [
+    {
+      "label": {
+        "fr": "Facteurs de risque"
+      }
+    }
+  ],
+  "familyrisk": [
+    {
+      "label": {
+        "fr": "Antécédents familiaux"
+      }
+    }
+  ],
+    "parameter": [
+      {
+        "cdLocal": "LOCAL-PARAMETER|009D",
+        "label": {
+          "fr": "Pouls"
+        },
+        "tags": [
+          {
+            "type": "CD-PARAMETER",
+            "code": "heartrate",
+            "version": "1"
+          }
+        ]
+      },
+      {
+        "cdLocal": "LOCAL-PARAMETER|1E17",
+        "label": {
+          "fr": "Diagnostic"
+        },
+        "tags": [
+          {
+            "type": "CD-ITEM",
+            "code": "diagnosis",
+            "version": "1"
+          }
+        ]
+      },
+      {
+        "cdLocal": "LOCAL-PARAMETER|0260",
+        "label": {
+          "fr": "Commentaire"
+        },
+        "tags": [
+          {
+            "type": "CD-ITEM",
+            "code": "note",
+            "version": "1"
+          }
+        ]
+      },
+      {
+        "cdLocal": "LOCAL-PARAMETER|0700",
+        "label": {
+          "fr": "Prescription"
+        },
+        "tags": [
+          {
+            "type": "CD-ITEM",
+            "code": "treatment",
+            "version": "1"
+          }
+        ]
+      },
+      {
+        "cdLocal": "LOCAL-PARAMETER|00E2",
+        "label": {
+          "fr": "Vaccin"
+        },
+        "tags": [
+          {
+            "type": "CD-ITEM",
+            "code": "vaccine",
+            "version": "1"
+          }
+        ]
+      },
+      {
+        "cdLocal": "LOCAL-PARAMETER|090F",
+        "label": {
+          "fr": "Description"
+        }
+      },
+      {
+        "cdLocal": "LOCAL-PARAMETER|110E",
+        "label": {
+          "fr": "Evénement planifié"
+        },
+        "tags": [
+          {
+            "type": "CD-ITEM",
+            "code": "actionplan",
+            "version": "1"
+          },
+          {
+            "type": "CD-LIFECYCLE",
+            "code": "planned",
+            "version": "1"
+          }
+        ]
+      },
+      {
+        "label": {
+          "fr": "Observation"
+        }
+      }
+    ]
+}

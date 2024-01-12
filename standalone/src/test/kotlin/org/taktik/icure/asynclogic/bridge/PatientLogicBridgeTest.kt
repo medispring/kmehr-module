@@ -1,0 +1,330 @@
+package org.taktik.icure.asynclogic.bridge
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
+import org.taktik.icure.config.BridgeConfig
+import org.taktik.icure.entities.Patient
+import org.taktik.icure.security.jwt.JwtUtils
+import org.taktik.icure.services.external.rest.v2.mapper.PatientV2Mapper
+import org.taktik.icure.test.*
+import kotlin.random.Random
+
+@SpringBootTest(
+    classes = [KmehrTestApplication::class],
+    properties = [
+        "spring.main.allow-bean-definition-overriding=true"
+    ],
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+@ActiveProfiles(profiles = ["kmehr"])
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class PatientLogicBridgeTest(
+    @Autowired val bridgeConfig: BridgeConfig,
+    @Autowired val patientMapper: PatientV2Mapper,
+    @Autowired val jwtUtils: JwtUtils
+) : StringSpec() {
+
+    init {
+        runBlocking {
+            val hcp = createHealthcarePartyUser(
+                bridgeConfig.iCureUrl,
+                KmehrTestApplication.masterHcp.login,
+                KmehrTestApplication.masterHcp.password,
+                jwtUtils
+            )
+
+            val patientBridge = PatientLogicBridge(
+                KmehrTestApplication.fakeSessionLogic,
+                bridgeConfig,
+                patientMapper
+            )
+
+            patientLogicBridgeTest(hcp, patientBridge)
+        }
+    }
+
+}
+
+private suspend fun StringSpec.patientLogicBridgeTest(
+    credentials: UserCredentials,
+    patientBridge: PatientLogicBridge
+) {
+
+    "Can get a Patient" {
+        withAuthenticatedReactorContext(credentials) {
+            val newPatient = patientBridge.createPatient(
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = uuid(),
+                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                )
+            )
+
+            val retrievedPatient = patientBridge.getPatient(newPatient!!.id)
+            retrievedPatient shouldNotBe null
+            retrievedPatient!!.id shouldBe newPatient.id
+        }
+    }
+
+    "Can create a Patient" {
+        withAuthenticatedReactorContext(credentials) {
+            val patientToCreate = Patient(
+                id = uuid(),
+                firstName = "patient",
+                lastName = uuid(),
+                delegations = mapOf(credentials.dataOwnerId!! to setOf())
+            )
+            patientBridge.createPatient(patientToCreate).let {
+                it shouldNotBe null
+                it?.id shouldBe patientToCreate.id
+                it?.firstName shouldBe patientToCreate.firstName
+                it?.lastName shouldBe patientToCreate.lastName
+            }
+        }
+    }
+
+    "Trying to retrieve a non-existing Patient will result in a null result" {
+        withAuthenticatedReactorContext(credentials) {
+            patientBridge.getPatient(uuid()) shouldBe null
+        }
+    }
+
+    "Can retrieve Patients by HCP id and SSIN" {
+        withAuthenticatedReactorContext(credentials) {
+            val patients = List(5) {
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = uuid(),
+                    ssin = uuid(),
+                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                )
+            }
+            patientBridge.createPatients(patients).count() shouldBe patients.size
+
+            val result = patientBridge.listByHcPartyAndSsinIdsOnly(
+                patients.first().ssin!!,
+                patients.first().delegations.keys.first()
+            ).toList()
+            result.size shouldBe 1
+            result.first() shouldBe patients.first().id
+        }
+    }
+
+    "Can retrieve Patients by HCP id and SSIN even when it exceeds internal pagination limit" {
+        withAuthenticatedReactorContext(credentials) {
+            val ssin = uuid()
+            val hcpId = credentials.dataOwnerId!!
+            val correctPatients = List(1500) {
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = uuid(),
+                    ssin = ssin,
+                    delegations = mapOf(hcpId to setOf())
+                )
+            }
+            patientBridge.createPatients(correctPatients).count() shouldBe correctPatients.size
+            val correctPatientsId = correctPatients.map { it.id }
+            patientBridge.createPatients(
+                List(1000) {
+                    Patient(
+                        id = uuid(),
+                        firstName = "patient",
+                        lastName = uuid(),
+                        ssin = uuid(),
+                        delegations = mapOf(hcpId to setOf())
+                    )
+                }
+            ).count() shouldBe 1000
+
+            patientBridge.listByHcPartyAndSsinIdsOnly(ssin, hcpId)
+                .onEach {
+                    correctPatientsId shouldContain it
+                }.count() shouldBe correctPatients.size
+        }
+    }
+
+    "When no Patient matches the HCP and SSIN filter, an empty result is returned" {
+        withAuthenticatedReactorContext(credentials) {
+            patientBridge.listByHcPartyAndSsinIdsOnly(uuid(), credentials.dataOwnerId!!).count() shouldBe 0
+        }
+    }
+
+    "Can retrieve Patients by HCP id and date of birth" {
+        withAuthenticatedReactorContext(credentials) {
+            val patients = List(5) {
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = uuid(),
+                    ssin = uuid(),
+                    dateOfBirth = Random.nextInt(19000000, 20220000),
+                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                )
+            }
+            patientBridge.createPatients(patients).count() shouldBe 5
+
+            val result = patientBridge.listByHcPartyDateOfBirthIdsOnly(
+                patients.first().dateOfBirth!!,
+                patients.first().delegations.keys.first()
+            ).toList()
+            result.size shouldBe 1
+            result.first() shouldBe patients.first().id
+        }
+    }
+
+    "Can retrieve Patients by HCP id and date of birth even when it exceeds internal pagination limit" {
+        withAuthenticatedReactorContext(credentials) {
+            val dateOfBirth = Random.nextInt(19000000, 20220000)
+            val hcpId = credentials.dataOwnerId!!
+            val correctPatients = List(1500) {
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = uuid(),
+                    ssin = uuid(),
+                    dateOfBirth = dateOfBirth,
+                    delegations = mapOf(hcpId to setOf())
+                )
+            }
+            patientBridge.createPatients(correctPatients).count() shouldBe correctPatients.size
+            val correctPatientsId = correctPatients.map { it.id }
+            patientBridge.createPatients(
+                List(1000) {
+                    Patient(
+                        id = uuid(),
+                        firstName = "patient",
+                        lastName = uuid(),
+                        ssin = uuid(),
+                        dateOfBirth = Random.nextInt(19000000, 20220000),
+                        delegations = mapOf(hcpId to setOf())
+                    )
+                }
+            ).count() shouldBe 1000
+
+            patientBridge.listByHcPartyDateOfBirthIdsOnly(dateOfBirth, hcpId)
+                .onEach {
+                    correctPatientsId shouldContain it
+                }.count() shouldBe correctPatients.size
+        }
+    }
+
+    "When no Patient matches the HCP and date of birth filter, an empty result is returned" {
+        withAuthenticatedReactorContext(credentials) {
+            patientBridge.listByHcPartyDateOfBirthIdsOnly(Random.nextInt(19000000, 20220000), credentials.dataOwnerId!!)
+                .count() shouldBe 0
+        }
+    }
+
+    "Can retrieve Patients by HCP id and fuzzy name" {
+        withAuthenticatedReactorContext(credentials) {
+            val name = uuid().replace("-", "")
+            val patients = List(5) {
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = uuid(),
+                    ssin = uuid(),
+                    dateOfBirth = Random.nextInt(19000000, 20220000),
+                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                )
+            }
+            val correctPatients = listOf(
+                Patient(
+                    id = uuid(),
+                    firstName = name,
+                    lastName = "patient",
+                    ssin = uuid(),
+                    dateOfBirth = Random.nextInt(19000000, 20220000),
+                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                ),
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = "patient",
+                    spouseName = name,
+                    ssin = uuid(),
+                    dateOfBirth = Random.nextInt(19000000, 20220000),
+                    delegations = mapOf(credentials.dataOwnerId to setOf())
+                ), Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = "patient",
+                    maidenName = name,
+                    ssin = uuid(),
+                    dateOfBirth = Random.nextInt(19000000, 20220000),
+                    delegations = mapOf(credentials.dataOwnerId to setOf())
+                )
+            )
+            patientBridge.createPatients(patients + correctPatients)
+                .count() shouldBe (patients.size + correctPatients.size)
+
+            patientBridge.listByHcPartyNameContainsFuzzyIdsOnly(name, credentials.dataOwnerId)
+                .onEach { patientId ->
+                    correctPatients.map { it.id } shouldContain patientId
+                }.count() shouldBe correctPatients.size
+        }
+    }
+
+    "When no Patient matches the HCP and fuzzy name filter, an empty result is returned" {
+        withAuthenticatedReactorContext(credentials) {
+            patientBridge.listByHcPartyNameContainsFuzzyIdsOnly(
+                uuid().replace("-", ""),
+                credentials.dataOwnerId!!
+            ).count() shouldBe 0
+        }
+    }
+
+    "Can retrieve multiple patients by ID" {
+        withAuthenticatedReactorContext(credentials) {
+            val patients = List(5) {
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = uuid(),
+                    ssin = uuid(),
+                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                )
+            }
+            patientBridge.createPatients(patients).count() shouldBe patients.size
+
+            patientBridge.getPatients(patients.map { it.id }).count() shouldBe 5
+        }
+    }
+
+    "Can retrieve multiple patients by ID, skipping the ids that do not exist" {
+        withAuthenticatedReactorContext(credentials) {
+            val patients = List(5) {
+                Patient(
+                    id = uuid(),
+                    firstName = "patient",
+                    lastName = uuid(),
+                    ssin = uuid(),
+                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                )
+            }
+            patientBridge.createPatients(patients).count() shouldBe patients.size
+
+            patientBridge.getPatients(patients.map { it.id } + uuid()).count() shouldBe 5
+        }
+    }
+
+    "Retrieving multiple patients with non-existent ids will result in an empty flow" {
+        withAuthenticatedReactorContext(credentials) {
+            patientBridge.getPatients(List(5) { uuid() }).count() shouldBe 0
+        }
+    }
+
+}

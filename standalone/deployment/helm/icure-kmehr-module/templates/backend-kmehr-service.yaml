@@ -1,0 +1,26 @@
+{{- if .Values.images.kmehr.replicaCount }}
+apiVersion: v1
+kind: Service
+metadata:
+    name: "{{ template "fullname" . }}-kmehr"
+    labels:
+        app: {{ template "name" . }}
+        chart: {{ template "chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+        component: "kmehr"
+spec:
+    ports:
+        -   protocol: TCP
+            port: {{ .Values.images.kmehr.servicePort }}
+            name: http
+            targetPort: http
+        -   protocol: TCP
+            port: 5701
+            name: hz1
+            targetPort: hz1
+    selector:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+        component: "kmehr"
+  {{- end }}

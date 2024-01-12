@@ -1,0 +1,11 @@
+[versions]
+ktor = "2.2.3"
+
+[libraries]
+commonsCodec = { group = "commons-codec", name = "commons-codec", version = "1.15"}
+mustacheJava = { group = "com.github.spullara.mustache.java", name = "compiler", version = "0.9.10" }
+ktorNegotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+icureKotlinSDK = { group = "io.icure", name = "icure-reactive-kotlin-client", version = "0.1.491-g670dc3a3a8" }
+icureTestStack = { group = "io.icure", name = "icure-e2e-test-setup", version = "0.0.24-gc854bb2431" }
+ajaltClikt = { group = "com.github.ajalt", name = "clikt", version = "2.8.0" }
+credentialsRotation = { group = "com.icure", name = "credentials-rotation", version = "0.0.4-gcfc84d62bd" }

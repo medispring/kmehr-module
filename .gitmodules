@@ -1,0 +1,6 @@
+[submodule "icure-pre-commit"]
+	path = icure-pre-commit
+	url = ../icure-pre-commit
+[submodule "kraken-common"]
+	path = kraken-common
+	url = https://github.com/icure/kraken-common.git

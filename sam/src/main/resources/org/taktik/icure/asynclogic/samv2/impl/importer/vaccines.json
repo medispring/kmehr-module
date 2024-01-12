@@ -1,0 +1,1092 @@
+[
+	{
+		"cnk": "0061358",
+		"codes": [
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "0064527",
+		"codes": [
+			"varicella"
+		]
+	},
+	{
+		"cnk": "0069914",
+		"codes": [
+			"typhoid"
+		]
+	},
+	{
+		"cnk": "0083063",
+		"codes": [
+			"poliomyelitis"
+		]
+	},
+	{
+		"cnk": "0320879",
+		"codes": [
+			"hib"
+		]
+	},
+	{
+		"cnk": "0830091",
+		"codes": [
+			"mumps",
+			"measles",
+			"rubella"
+		]
+	},
+	{
+		"cnk": "1035849",
+		"codes": [
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "1075712",
+		"codes": [
+			"diphteria",
+			"tetanus"
+		]
+	},
+	{
+		"cnk": "1077593",
+		"codes": [
+			"diphteria",
+			"tetanus"
+		]
+	},
+	{
+		"cnk": "1149939",
+		"codes": [
+			"hepatitisa"
+		]
+	},
+	{
+		"cnk": "1152743",
+		"codes": [
+			"yellowfever"
+		]
+	},
+	{
+		"cnk": "1185685",
+		"codes": [
+			"pneumonia23"
+		]
+	},
+	{
+		"cnk": "1272665",
+		"codes": [
+			"hepatitisa",
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "1321058",
+		"codes": [
+			"hepatitisa"
+		]
+	},
+	{
+		"cnk": "1327485",
+		"codes": [
+			"hepatitisa",
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "1345545",
+		"codes": [
+			"hepatitisa"
+		]
+	},
+	{
+		"cnk": "1358167",
+		"codes": [
+			"mumps",
+			"measles",
+			"rubella"
+		]
+	},
+	{
+		"cnk": "1460369",
+		"codes": [
+			"typhoid"
+		]
+	},
+	{
+		"cnk": "1526425",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"poliomyelitis"
+		]
+	},
+	{
+		"cnk": "1551282",
+		"codes": [
+			"pneumonia7"
+		]
+	},
+	{
+		"cnk": "1552215",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"pertussis",
+			"poliomyelitis"
+		]
+	},
+	{
+		"cnk": "1572452",
+		"codes": [
+			"hepatitisa"
+		]
+	},
+	{
+		"cnk": "1657907",
+		"codes": [
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "1657915",
+		"codes": [
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "1657923",
+		"codes": [
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "1658376",
+		"codes": [
+			"meningitisc"
+		]
+	},
+	{
+		"cnk": "1659663",
+		"codes": [
+			"meningitisc"
+		]
+	},
+	{
+		"cnk": "1665363",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"pertussis",
+			"poliomyelitis",
+			"hib",
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "1696392",
+		"codes": [
+			"meningitisc"
+		]
+	},
+	{
+		"cnk": "1734094",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"pertussis"
+		]
+	},
+	{
+		"cnk": "2210151",
+		"codes": [
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "2223600",
+		"codes": [
+			"tickborneencephalitis"
+		]
+	},
+	{
+		"cnk": "2223618",
+		"codes": [
+			"tickborneencephalitis"
+		]
+	},
+	{
+		"cnk": "2231868",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"pertussis",
+			"poliomyelitis"
+		]
+	},
+	{
+		"cnk": "2231900",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"poliomyelitis"
+		]
+	},
+	{
+		"cnk": "2231934",
+		"codes": [
+			"typhoid"
+		]
+	},
+	{
+		"cnk": "2231967",
+		"codes": [
+			"rabies"
+		]
+	},
+	{
+		"cnk": "2232221",
+		"codes": [
+			"varicella"
+		]
+	},
+	{
+		"cnk": "2246775",
+		"codes": [
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "2284024",
+		"codes": [
+			"rotavirus"
+		]
+	},
+	{
+		"cnk": "2285575",
+		"codes": [
+			"cholera"
+		]
+	},
+	{
+		"cnk": "2322436",
+		"codes": [
+			"rotavirus"
+		]
+	},
+	{
+		"cnk": "2324911",
+		"codes": [
+			"mumps",
+			"measles",
+			"rubella"
+		]
+	},
+	{
+		"cnk": "2324937",
+		"codes": [
+			"zona"
+		]
+	},
+	{
+		"cnk": "2374429",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"pertussis",
+			"poliomyelitis"
+		]
+	},
+	{
+		"cnk": "2385136",
+		"codes": [
+			"papillomavirus"
+		]
+	},
+	{
+		"cnk": "4665212",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4670576",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4674438",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2394070",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2394914",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2394955",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2415586",
+		"codes": [
+			"papillomavirus"
+		]
+	},
+	{
+		"cnk": "2445344",
+		"codes": [
+			"meningitisc"
+		]
+	},
+	{
+		"cnk": "2469567",
+		"codes": [
+			"mumps",
+			"measles",
+			"rubella",
+			"varicella"
+		]
+	},
+	{
+		"cnk": "2473809",
+		"codes": [
+			"meningitis"
+		]
+	},
+	{
+		"cnk": "2493260",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2542587",
+		"codes": [
+			"hepatitisa"
+		]
+	},
+	{
+		"cnk": "2553063",
+		"codes": [
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "258727",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2591774",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2605343",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2607885",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2620888",
+		"codes": [
+			"pneumonia10"
+		]
+	},
+	{
+		"cnk": "2656544",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2657088",
+		"codes": [
+			"pneumonia13"
+		]
+	},
+	{
+		"cnk": "2663532",
+		"codes": [
+			"rotavirus"
+		]
+	},
+	{
+		"cnk": "2699296",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2706661",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2707222",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2710176",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2729358",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2730083",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2765428",
+		"codes": [
+			"meningitis"
+		]
+	},
+	{
+		"cnk": "2765444",
+		"codes": [
+			"rabies"
+		]
+	},
+	{
+		"cnk": "2765469",
+		"codes": [
+			"ej"
+		]
+	},
+	{
+		"cnk": "2798379",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2801553",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2802882",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2807030",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2807048",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2807063",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2830065",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2852788",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2929503",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2933802",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2936730",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2936789",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2947737",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "2950996",
+		"codes": [
+			"meningitis"
+		]
+	},
+	{
+		"cnk": "3019601",
+		"codes": [
+			"hepatitisa"
+		]
+	},
+	{
+		"cnk": "3020278",
+		"codes": [
+			"hepatitisa"
+		]
+	},
+	{
+		"cnk": "3030186",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3032513",
+		"codes": [
+			"meningitisb"
+		]
+	},
+	{
+		"cnk": "3038023",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3038031",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3040474",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3042470",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3050176",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"pertussis",
+			"poliomyelitis",
+			"hib",
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "3062411",
+		"codes": [
+			"meningitisc"
+		]
+	},
+	{
+		"cnk": "3139912",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3147410",
+		"codes": [
+			"papillomavirus"
+		]
+	},
+	{
+		"cnk": "3147469",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3147477",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3148525",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3149358",
+		"codes": [
+			"pneumonia23"
+		]
+	},
+	{
+		"cnk": "3217783",
+		"codes": [
+			"hepatitisa",
+			"typhoid"
+		]
+	},
+	{
+		"cnk": "3258282",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3260320",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3260346",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3260353",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3263738",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3308277",
+		"codes": [
+			"tickborneencephalitis"
+		]
+	},
+	{
+		"cnk": "3308285",
+		"codes": [
+			"tickborneencephalitis"
+		]
+	},
+	{
+		"cnk": "3395761",
+		"codes": [
+			"pneumonia23"
+		]
+	},
+	{
+		"cnk": "3402799",
+		"codes": [
+			"papillomavirus"
+		]
+	},
+	{
+		"cnk": "3424561",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3431970",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3431988",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3435138",
+		"codes": [
+			"meningitis"
+		]
+	},
+	{
+		"cnk": "3561727",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3561792",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3562394",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3598034",
+		"codes": [
+			"meningitisb"
+		]
+	},
+	{
+		"cnk": "3707767",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"pertussis"
+		]
+	},
+	{
+		"cnk": "3720935",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3742780",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3745577",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3813805",
+		"codes": [
+			"pneumonia13"
+		]
+	},
+	{
+		"cnk": "3906781",
+		"codes": [
+			"varicella"
+		]
+	},
+	{
+		"cnk": "3911963",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3926664",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "3930179",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4121596",
+		"codes": [
+			"measles",
+			"mumps",
+			"rubella",
+			"varicella"
+		]
+	},
+	{
+		"cnk": "4172672",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4176053",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4185344",
+		"codes": [
+			"zona"
+		]
+	},
+	{
+		"cnk": "4185492",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4201778",
+		"codes": [
+			"pneumonia13"
+		]
+	},
+	{
+		"cnk": "4237939",
+		"codes": [
+			"poliomyelitis",
+			"diphteria",
+			"tetanus",
+			"pertussis"
+		]
+	},
+	{
+		"cnk": "4293254",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4297123",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4299764",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4301081",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4307617",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4314258",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4314894",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4327318",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4380937",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4380945",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4380952",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4380960",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4470696",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4476651",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4489795",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4490843",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4491007",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4491015",
+		"codes": [
+			"pneumonia15"
+		]
+	},
+	{
+		"cnk": "4492567",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4499844",
+		"codes": [
+			"pneumonia20"
+		]
+	},
+	{
+		"cnk": "4623567",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4623641",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4629820",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "7712714",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "7719073",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "7732829",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "7722952",
+		"codes": [
+			"seasonalinfluenza"
+		]
+	},
+	{
+		"cnk": "4740098",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4740106",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4741435",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "4651535",
+		"codes": [
+			"covid19"
+		]
+	},
+	{
+		"cnk": "3652112",
+		"codes": [
+			"diphteria",
+			"tetanus",
+			"pertussis",
+			"poliomyelitis",
+			"hib",
+			"hepatitisb"
+		]
+	},
+	{
+		"cnk": "4710224",
+		"codes": [
+			"rsv"
+		]
+	}
+]
