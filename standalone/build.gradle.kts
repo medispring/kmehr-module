@@ -29,10 +29,6 @@ val gitVersion: String? by project
 group = "org.taktik.icure"
 version = gitVersion ?: "0.0.1-SNAPSHOT"
 
-configure<com.taktik.gradle.plugins.HelmRepositoryPluginExtension> {
-    this.chartNameOverride = "icure-kmehr-module"
-}
-
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     mainClass.set("org.taktik.icure.ICureKmehrStandaloneModuleKt")
     manifest {
