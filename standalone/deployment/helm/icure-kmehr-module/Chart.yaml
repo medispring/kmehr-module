@@ -1,4 +1,4 @@
-name: icure-kmehr-module
+name: kmehr-module
 version: 0.0.0
 apiVersion: v1
 description: iCure Backend
