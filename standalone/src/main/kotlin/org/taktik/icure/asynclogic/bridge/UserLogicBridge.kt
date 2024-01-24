@@ -78,9 +78,7 @@ class UserLogicBridge(
     }
 
     override suspend fun getUser(id: String): User? =
-        try {
-            getApi()?.getUser(id)?.let { userMapper.map(it) }
-        } catch(e: Exception) { null }
+        getApi()?.getUser(id)?.let { userMapper.map(it) }
 
     override suspend fun getUserByEmail(email: String): User? {
         throw BridgeException()
@@ -107,9 +105,7 @@ class UserLogicBridge(
     }
 
     override fun listUserIdsByHcpartyId(hcpartyId: String): Flow<String> = flow {
-        emitAll(
-            getApi()?.findByHcpartyId(hcpartyId)?.asFlow() ?: emptyFlow()
-        )
+        emitAll(getApi()?.findByHcpartyId(hcpartyId)?.asFlow() ?: emptyFlow())
     }
 
     override fun listUserIdsByNameEmailPhone(searchString: String): Flow<String> {

@@ -54,9 +54,7 @@ class DocumentLogicBridge(
     }
 
     override suspend fun getDocument(documentId: String): Document? =
-        try {
-            getApi()?.getDocument(documentId)?.let(documentMapper::map)
-        } catch (e: ClientException) { null }
+        getApi()?.getDocument(documentId)?.let(documentMapper::map)
 
     override fun getDocuments(documentIds: Collection<String>): Flow<Document> {
         throw BridgeException()
@@ -71,7 +69,12 @@ class DocumentLogicBridge(
     }
 
     override suspend fun getMainAttachment(documentId: String): Flow<DataBuffer> =
-        getApi()?.getDocumentMainAttachment(documentId, null)?.asDataBuffer() ?: emptyFlow()
+        getApi()?.let { api ->
+            val document = getDocument(documentId)
+            if(document?.attachmentId != null || document?.objectStoreReference != null) {
+                api.getDocumentMainAttachment(documentId, null).asDataBuffer()
+            } else null
+        } ?: emptyFlow()
 
     override suspend fun getMainAttachment(document: Document): Flow<DataBuffer> {
         throw BridgeException()

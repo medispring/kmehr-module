@@ -1,5 +1,7 @@
 package org.taktik.icure.asynclogic.bridge
 
+import io.icure.kraken.client.infrastructure.ClientException
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -17,7 +19,12 @@ import org.taktik.icure.entities.embed.Service
 import org.taktik.icure.security.jwt.JwtUtils
 import org.taktik.icure.services.external.rest.v2.mapper.ContactV2Mapper
 import org.taktik.icure.services.external.rest.v2.mapper.embed.ServiceV2Mapper
-import org.taktik.icure.test.*
+import org.taktik.icure.test.BaseKmehrTest
+import org.taktik.icure.test.KmehrTestApplication
+import org.taktik.icure.test.UserCredentials
+import org.taktik.icure.test.createHealthcarePartyUser
+import org.taktik.icure.test.uuid
+import org.taktik.icure.test.withAuthenticatedReactorContext
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -93,7 +100,7 @@ private fun StringSpec.contactLogicBridgeTest(
                         )
                     ),
                     delegations = mapOf(
-                        hcp.dataOwnerId!! to setOf()
+                        hcp.dataOwnerId.shouldNotBeNull() to setOf()
                     )
                 )
             )
@@ -271,7 +278,7 @@ private fun StringSpec.contactLogicBridgeTest(
                 it shouldNotBe null
                 it?.id shouldBe contactToCreate.id
                 it?.medicalLocationId shouldBe contactToCreate.medicalLocationId
-            }!!
+            }.shouldNotBeNull()
 
             val newLocation = uuid()
             contactBridge.modifyEntities(

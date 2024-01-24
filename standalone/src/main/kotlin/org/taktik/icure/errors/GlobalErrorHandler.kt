@@ -3,6 +3,7 @@ package org.taktik.icure.errors
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.icure.kraken.client.infrastructure.ClientException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
@@ -13,7 +14,12 @@ import org.springframework.http.MediaType
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.ServerWebInputException
 import org.taktik.couchdb.exception.CouchDbConflictException
-import org.taktik.icure.exceptions.*
+import org.taktik.icure.exceptions.ForbiddenRequestException
+import org.taktik.icure.exceptions.MissingRequirementsException
+import org.taktik.icure.exceptions.NotFoundRequestException
+import org.taktik.icure.exceptions.PasswordTooShortException
+import org.taktik.icure.exceptions.QuotaExceededException
+
 import reactor.core.publisher.Mono
 import java.io.IOException
 
@@ -31,14 +37,21 @@ open class GlobalErrorHandler : ErrorWebExceptionHandler {
         r.writeWith(
             Mono.just(
                 when (ex) {
+                    is ClientException -> bufferFactory.toBuffer(ex.message).also {
+                        when(ex.statusCode) {
+                            401 -> r.statusCode = HttpStatus.UNAUTHORIZED
+                            403 -> r.statusCode = HttpStatus.FORBIDDEN
+                            404 -> r.statusCode = HttpStatus.NOT_FOUND
+                            409 -> r.statusCode = HttpStatus.CONFLICT
+                            else -> r.statusCode = HttpStatus.BAD_REQUEST
+                        }
+                    }
                     is IOException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.BAD_REQUEST }
                     is PasswordTooShortException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.NOT_ACCEPTABLE }
-                    is NotFoundRequestException -> bufferFactory.toBuffer(ex.message)
-                        .also { r.statusCode = HttpStatus.NOT_FOUND }
-                    is ForbiddenRequestException -> bufferFactory.toBuffer(ex.message)
-                        .also { r.statusCode = HttpStatus.FORBIDDEN }
-                    is IllegalArgumentException -> bufferFactory.toBuffer(ex.message)
-                        .also { r.statusCode = HttpStatus.BAD_REQUEST }
+                    is NotFoundRequestException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.NOT_FOUND }
+                    is ForbiddenRequestException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.FORBIDDEN }
+                    is UnauthorizedException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.UNAUTHORIZED }
+                    is IllegalArgumentException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.BAD_REQUEST }
                     is CouchDbConflictException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.CONFLICT }
                     is MissingRequirementsException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.BAD_REQUEST }
                     is QuotaExceededException -> bufferFactory.toBuffer(ex.message).also { r.statusCode = HttpStatus.PAYMENT_REQUIRED }

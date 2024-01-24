@@ -59,8 +59,7 @@ abstract class GenericResultFormatLogicImpl(
         hcpId: String?,
         protocolIds: List<String?>,
         formIds: List<String?>,
-    ) =
-        lls.map { ll ->
+    ) = lls.map { ll ->
             val formId = protocolIds.last{
                 (it == (ll.ril?.protocol ?: ll.resultReference)) || protocolIds.size == 1 && (it?.startsWith("***") == true)
             }?.let { formIds[protocolIds.lastIndexOf(it)] }

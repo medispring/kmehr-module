@@ -59,7 +59,7 @@ class EfactControllerE2ETest(
 
         val objectMapper: ObjectMapper = ObjectMapper()
             .registerKotlinModule()
-            .registerModule(JavaTimeModule())!!
+            .registerModule(JavaTimeModule())
 
         suspend fun generateInvoices(iCureUrl: String, jwt: String) =
             InvoiceApi(basePath = iCureUrl, authProvider = ExternalJWTProvider(jwt))

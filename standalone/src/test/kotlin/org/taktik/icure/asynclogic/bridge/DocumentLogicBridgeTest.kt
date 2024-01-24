@@ -1,9 +1,15 @@
 package org.taktik.icure.asynclogic.bridge
 
+import io.icure.kraken.client.infrastructure.ClientException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
 import org.taktik.icure.asynclogic.objectstorage.DataAttachmentChange
@@ -11,7 +17,15 @@ import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.Document
 import org.taktik.icure.security.jwt.JwtUtils
 import org.taktik.icure.services.external.rest.v2.mapper.DocumentV2MapperImpl
-import org.taktik.icure.test.*
+import org.taktik.icure.test.BaseKmehrTest
+import org.taktik.icure.test.KmehrTestApplication
+import org.taktik.icure.test.UserCredentials
+import org.taktik.icure.test.createHealthcarePartyUser
+import org.taktik.icure.test.uuid
+import org.taktik.icure.test.withAuthenticatedReactorContext
+import org.taktik.icure.utils.toDataBuffer
+import java.nio.ByteBuffer
+import java.nio.charset.Charset
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DocumentLogicBridgeTest(
@@ -40,6 +54,17 @@ class DocumentLogicBridgeTest(
     }
 }
 
+private fun ByteBuffer.decodeString(charset: Charset): String {
+    val bytes = if(hasArray()) {
+        array()
+    } else {
+        val tmpBytes = ByteArray(remaining())
+        get(tmpBytes)
+        tmpBytes
+    }
+    return String(bytes, charset)
+}
+
 private fun StringSpec.documentLogicBridgeTest(
     credentials: UserCredentials,
     documentBridge: DocumentLogicBridge
@@ -51,10 +76,10 @@ private fun StringSpec.documentLogicBridgeTest(
                 Document(
                     id = uuid(),
                     name = uuid(),
-                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                    delegations = mapOf(credentials.dataOwnerId.shouldNotBeNull() to setOf())
                 )
-            )
-            documentBridge.getDocument(document!!.id).let {
+            ).shouldNotBeNull()
+            documentBridge.getDocument(document.id).let {
                 it shouldNotBe null
                 it?.id shouldBe document.id
                 it?.name shouldBe document.name
@@ -62,9 +87,11 @@ private fun StringSpec.documentLogicBridgeTest(
         }
     }
 
-    "Trying to get a Document that does not exists will result in a null result" {
+    "Trying to get a Document that does not exist will result in a 404" {
         withAuthenticatedReactorContext(credentials) {
-            documentBridge.getDocument(uuid()) shouldBe null
+            shouldThrow<ClientException> { documentBridge.getDocument(uuid()) }.also {
+                it.statusCode shouldBe 404
+            }
         }
     }
 
@@ -74,14 +101,52 @@ private fun StringSpec.documentLogicBridgeTest(
                 Document(
                     id = uuid(),
                     medicalLocationId = uuid(),
-                    delegations = mapOf(credentials.dataOwnerId!! to setOf())
+                    delegations = mapOf(credentials.dataOwnerId.shouldNotBeNull() to setOf())
                 ),
                 true
-            )
-            createdDocument shouldNotBe null
-            documentBridge.getDocument(createdDocument!!.id) shouldNotBe null
+            ).shouldNotBeNull()
+            documentBridge.getDocument(createdDocument.id) shouldNotBe null
         }
     }
+
+    "Can create a Document with a main attachment" {
+        withAuthenticatedReactorContext(credentials) {
+            val document = documentBridge.createDocument(
+                Document(
+                    id = uuid(),
+                    name = uuid(),
+                    delegations = mapOf(credentials.dataOwnerId.shouldNotBeNull() to setOf())
+                )
+            ).shouldNotBeNull()
+            val content = "A1/${uuid()}\n${uuid()}"
+            val fakeAttachment = content.toByteArray(Charsets.UTF_8)
+            val documentWithAttachment = documentBridge.updateAttachments(
+                document,
+                DataAttachmentChange.CreateOrUpdate(
+                    flowOf(ByteBuffer.wrap(fakeAttachment).toDataBuffer()),
+                    fakeAttachment.size.toLong(),
+                    listOf("public.plain-text")
+                )
+            ).shouldNotBeNull()
+            documentBridge.getMainAttachment(documentWithAttachment.id).map {
+                it.asByteBuffer().decodeString(Charsets.UTF_8)
+            }.toList().joinToString("") shouldBe content
+        }
+    }
+
+    "Retrieving the main attachment from a document that does not have it will result in an empty flow" {
+        withAuthenticatedReactorContext(credentials) {
+            val document = documentBridge.createDocument(
+                Document(
+                    id = uuid(),
+                    name = uuid(),
+                    delegations = mapOf(credentials.dataOwnerId.shouldNotBeNull() to setOf())
+                )
+            ).shouldNotBeNull()
+            documentBridge.getMainAttachment(document.id).toList().shouldBeEmpty()
+        }
+    }
+
 
     "Trying to update the attachments of a Document without a rev will result in an error" {
         withAuthenticatedReactorContext(credentials) {
@@ -91,5 +156,6 @@ private fun StringSpec.documentLogicBridgeTest(
             }
         }
     }
+
 
 }

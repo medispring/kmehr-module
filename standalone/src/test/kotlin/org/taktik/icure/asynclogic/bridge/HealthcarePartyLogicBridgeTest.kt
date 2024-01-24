@@ -1,5 +1,7 @@
 package org.taktik.icure.asynclogic.bridge
 
+import io.icure.kraken.client.infrastructure.ClientException
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeGreaterThan
@@ -73,9 +75,11 @@ private fun StringSpec.healthcarePartyLogicBridgeTest(
         }
     }
 
-    "Retrieving a non existent hcp will return null" {
+    "Retrieving a non existent hcp will return a 404 Client exception" {
         withAuthenticatedReactorContext(credentials) {
-            hcpBridge.getHealthcareParty(uuid()) shouldBe null
+            shouldThrow<ClientException> { hcpBridge.getHealthcareParty(uuid()) }.also {
+                it.statusCode shouldBe 404
+            }
         }
     }
 

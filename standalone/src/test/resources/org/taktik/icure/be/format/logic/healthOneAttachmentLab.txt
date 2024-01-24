@@ -1,0 +1,13 @@
+A1\{PROTOCOL_ID}\{CLININC_NAME}\
+A2\{PROTOCOL_ID}\Corwin\of Amber\M\23101957\
+A3\{PROTOCOL_ID}\Amber, 42\1970\AMBER\
+A4\{PROTOCOL_ID}\19337657\18012024\\C\
+L1\{PROTOCOL_ID}\1H150\Globules rouges\4,65    -5,50\millions/mm3\\4,50\
+L1\{PROTOCOL_ID}\1H140\Hémoglobine\13,5    -16,0\gr%\\14,8\
+L1\{PROTOCOL_ID}\1H151\Hématocrite\39,5    -47,0\%\\42,0\
+L1\{PROTOCOL_ID}\1H905\Vol.globulaire moyen\85      -96\micron3\\90\
+L1\{PROTOCOL_ID}\1H906\Teneur globulaire en HB\29,0    -32,0\pgr\\30,4\
+L1\{PROTOCOL_ID}\1H907\Conc.glob.moyen.en HB\33,0    -36,0\%\\35,1\
+L1\{PROTOCOL_ID}\1H158\Indice distribution GR\12,5    -16,0\\\15,0\
+L1\{PROTOCOL_ID}\1H160\Globules blancs\5,3     -10,0\mille/mm3\\8,6\
+END

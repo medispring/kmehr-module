@@ -116,11 +116,9 @@ class HealthcarePartyLogicBridge(
     }
 
     override suspend fun getHealthcareParty(id: String): HealthcareParty? =
-        try {
-            getApi()?.getHealthcareParty(id)?.let {
-                healthcarePartyMapper.map(it)
-            }
-        } catch (e: ClientException) { null }
+        getApi()?.getHealthcareParty(id)?.let {
+            healthcarePartyMapper.map(it)
+        }
 
     override suspend fun getPublicKey(healthcarePartyId: String): String? {
         throw BridgeException()

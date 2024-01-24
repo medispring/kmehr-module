@@ -1,5 +1,7 @@
 package org.taktik.icure.asynclogic.bridge
 
+import io.icure.kraken.client.infrastructure.ClientException
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
@@ -83,9 +85,11 @@ private suspend fun StringSpec.patientLogicBridgeTest(
         }
     }
 
-    "Trying to retrieve a non-existing Patient will result in a null result" {
+    "Trying to retrieve a non-existing Patient will result in a 404 Client exception" {
         withAuthenticatedReactorContext(credentials) {
-            patientBridge.getPatient(uuid()) shouldBe null
+            shouldThrow<ClientException> { patientBridge.getPatient(uuid()) }.also {
+                it.statusCode shouldBe 404
+            }
         }
     }
 
