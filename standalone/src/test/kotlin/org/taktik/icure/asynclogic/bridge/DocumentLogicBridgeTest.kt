@@ -6,31 +6,19 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import org.taktik.icure.asynclogic.objectstorage.DataAttachmentChange
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.Document
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.DocumentV2Mapper
 import org.taktik.icure.services.external.rest.v2.mapper.DocumentV2MapperImpl
 import org.taktik.icure.test.*
 
-@SpringBootTest(
-    classes = [KmehrTestApplication::class],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true"
-    ],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@ActiveProfiles(profiles = ["kmehr"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DocumentLogicBridgeTest(
-    @Autowired val bridgeConfig: BridgeConfig,
-    @Autowired val documentMapper: DocumentV2MapperImpl,
-    @Autowired val jwtUtils: JwtUtils
-) : StringSpec() {
+    val bridgeConfig: BridgeConfig,
+    val documentMapper: DocumentV2MapperImpl,
+    val jwtUtils: JwtUtils
+) : BaseKmehrTest() {
 
     init {
         runBlocking {

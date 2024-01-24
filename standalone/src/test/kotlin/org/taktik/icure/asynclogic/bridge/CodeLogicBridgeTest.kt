@@ -5,30 +5,23 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.base.Code
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.base.CodeV2Mapper
 import org.taktik.icure.services.external.rest.v2.mapper.base.CodeV2MapperImpl
-import org.taktik.icure.test.*
+import org.taktik.icure.test.BaseKmehrTest
+import org.taktik.icure.test.KmehrTestApplication
+import org.taktik.icure.test.UserCredentials
+import org.taktik.icure.test.createHealthcarePartyUser
+import org.taktik.icure.test.uuid
+import org.taktik.icure.test.withAuthenticatedReactorContext
 
-@SpringBootTest(
-    classes = [KmehrTestApplication::class],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true"
-    ],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@ActiveProfiles(profiles = ["kmehr"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CodeLogicBridgeTest(
     val bridgeConfig: BridgeConfig,
     val codeMapper: CodeV2MapperImpl,
     val jwtUtils: JwtUtils
-) : StringSpec() {
+) : BaseKmehrTest() {
 
     init {
         runBlocking {

@@ -12,15 +12,14 @@ import io.icure.kraken.client.apis.PatientApi
 import io.icure.kraken.client.apis.PermissionApi
 import io.icure.kraken.client.security.BasicAuthProvider
 import io.icure.kraken.client.security.ExternalJWTProvider
+import io.icure.kraken.client.security.JWTProvider
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.test.context.ActiveProfiles
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.security.jwt.JwtUtils
 import org.taktik.icure.service.external.rest.shared.controllers.be.EfactControllerE2ETest.Companion.createHcpWithBankInfo
@@ -37,6 +36,7 @@ import org.taktik.icure.services.external.rest.v2.dto.embed.InvoicingCodeDto
 import org.taktik.icure.services.external.rest.v2.dto.security.AlwaysPermissionItemDto
 import org.taktik.icure.services.external.rest.v2.dto.security.PermissionDto
 import org.taktik.icure.services.external.rest.v2.dto.security.PermissionTypeDto
+import org.taktik.icure.test.BaseKmehrTest
 import org.taktik.icure.test.KmehrTestApplication
 import org.taktik.icure.test.TestHttpClient
 import org.taktik.icure.test.UserCredentials
@@ -47,21 +47,13 @@ import org.taktik.icure.test.uuid
 import kotlin.random.Random
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalStdlibApi::class)
-@SpringBootTest(
-    classes = [KmehrTestApplication::class],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true"
-    ],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@ActiveProfiles(profiles = ["kmehr"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EfactControllerE2ETest(
     @LocalServerPort val port: Int,
     val httpClient: TestHttpClient,
     val bridgeConfig: BridgeConfig,
     val jwtUtils: JwtUtils
-) : StringSpec() {
+) : BaseKmehrTest() {
 
     companion object {
 
@@ -91,7 +83,8 @@ class EfactControllerE2ETest(
 
         suspend fun createInsurance(iCureUrl: String) = InsuranceApi(
             basePath = iCureUrl,
-            authProvider = BasicAuthProvider(
+            authProvider = JWTProvider(
+                iCureUrl,
                 KmehrTestApplication.masterHcp.login,
                 KmehrTestApplication.masterHcp.password
             )
@@ -118,7 +111,8 @@ class EfactControllerE2ETest(
             )
             HealthcarePartyApi(
                 basePath = iCureUrl,
-                authProvider = BasicAuthProvider(
+                authProvider = JWTProvider(
+                    iCureUrl,
                     KmehrTestApplication.masterHcp.login,
                     KmehrTestApplication.masterHcp.password
                 )
@@ -144,7 +138,8 @@ class EfactControllerE2ETest(
             }
             PermissionApi(
                 basePath = iCureUrl,
-                authProvider = BasicAuthProvider(
+                authProvider = JWTProvider(
+                    iCureUrl,
                     KmehrTestApplication.masterHcp.login,
                     KmehrTestApplication.masterHcp.password)
             ).modifyUserPermissions(

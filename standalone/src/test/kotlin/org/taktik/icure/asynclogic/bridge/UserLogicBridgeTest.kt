@@ -7,29 +7,18 @@ import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.User
 import org.taktik.icure.security.jwt.JwtUtils
 import org.taktik.icure.services.external.rest.v2.mapper.UnsecureUserV2MapperImpl
 import org.taktik.icure.test.*
 
-@SpringBootTest(
-    classes = [KmehrTestApplication::class],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true"
-    ],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@ActiveProfiles(profiles = ["kmehr"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserLogicBridgeTest(
-    @Autowired val bridgeConfig: BridgeConfig,
-    @Autowired val userMapper: UnsecureUserV2MapperImpl,
-    @Autowired val jwtUtils: JwtUtils
-) : StringSpec() {
+    val bridgeConfig: BridgeConfig,
+    val userMapper: UnsecureUserV2MapperImpl,
+    val jwtUtils: JwtUtils
+) : BaseKmehrTest() {
 
     init {
         runBlocking {

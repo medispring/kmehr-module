@@ -42,7 +42,7 @@ class SAMCouchDBDispatcher (
                 override suspend fun getValue(key: CouchDbConnectorReference): Client {
                     return ClientImpl(
                         httpClient = httpClient,
-                        dbURI = URIBuilder((datastoreInformation as SAMDatastoreInformation).dbInstanceUrl).setPath("$prefix-$dbFamily").build(),
+                        dbURI = URIBuilder((datastoreInformation as SAMDatastoreInformation).dbInstanceUrl).setPath("$prefix-__-$dbFamily").build(),
                         objectMapper = objectMapper,
                         credentialsProvider = couchDbCredentialsProvider
                     ).also {

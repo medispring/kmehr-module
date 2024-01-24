@@ -11,9 +11,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.HealthElement
 import org.taktik.icure.entities.embed.Delegation
@@ -22,20 +19,12 @@ import org.taktik.icure.services.external.rest.v2.mapper.HealthElementV2MapperIm
 import org.taktik.icure.test.*
 import kotlin.random.Random
 
-@SpringBootTest(
-    classes = [KmehrTestApplication::class],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true"
-    ],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@ActiveProfiles(profiles = ["kmehr"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HealthElementLogicBridgeTest(
-    @Autowired val bridgeConfig: BridgeConfig,
-    @Autowired val heMapper: HealthElementV2MapperImpl,
-    @Autowired val jwtUtils: JwtUtils
-) : StringSpec() {
+    val bridgeConfig: BridgeConfig,
+    val heMapper: HealthElementV2MapperImpl,
+    val jwtUtils: JwtUtils
+) : BaseKmehrTest() {
 
     init {
         runBlocking {

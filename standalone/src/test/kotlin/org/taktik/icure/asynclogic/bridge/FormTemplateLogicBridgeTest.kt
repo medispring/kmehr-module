@@ -7,35 +7,25 @@ import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.test.context.ActiveProfiles
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.FormTemplate
 import org.taktik.icure.entities.base.CodeStub
 import org.taktik.icure.security.jwt.JwtUtils
 import org.taktik.icure.services.external.rest.v2.mapper.FormTemplateV2MapperImpl
+import org.taktik.icure.test.BaseKmehrTest
 import org.taktik.icure.test.KmehrTestApplication
 import org.taktik.icure.test.UserCredentials
 import org.taktik.icure.test.createHealthcarePartyUser
 import org.taktik.icure.test.uuid
 import org.taktik.icure.test.withAuthenticatedReactorContext
 
-@SpringBootTest(
-    classes = [KmehrTestApplication::class],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true"
-    ],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@ActiveProfiles(profiles = ["kmehr"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FormTemplateLogicBridgeTest(
-    @Autowired val bridgeConfig: BridgeConfig,
-    @Autowired val formTemplateMapper: FormTemplateV2MapperImpl,
-    @Autowired val jwtUtils: JwtUtils
-) : StringSpec() {
+    val bridgeConfig: BridgeConfig,
+    val formTemplateMapper: FormTemplateV2MapperImpl,
+    val jwtUtils: JwtUtils
+) : BaseKmehrTest() {
 
     init {
         runBlocking {

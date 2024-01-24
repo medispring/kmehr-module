@@ -7,6 +7,7 @@ import io.icure.kraken.client.apis.HealthcarePartyApi
 import io.icure.kraken.client.apis.PermissionApi
 import io.icure.kraken.client.apis.UserApi
 import io.icure.kraken.client.security.BasicAuthProvider
+import io.icure.kraken.client.security.JWTProvider
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -67,7 +68,7 @@ import java.io.File
 )
 @PropertySource("classpath:kmehr-test.properties")
 @TestConfiguration
-open class KmehrTestApplication {
+class KmehrTestApplication {
 
     companion object {
         lateinit var groupId: String
@@ -82,7 +83,7 @@ open class KmehrTestApplication {
     private val krakenCompose = System.getenv("KRAKEN_COMPOSE") ?: "file://$composeDir/docker-compose-cloud.yaml"
 
     @Bean
-    open fun performStartupTasks(
+    fun performStartupTasks(
         bridgeConfig: BridgeConfig,
         jwtUtils: JwtUtils,
         objectMapper: ObjectMapper,
@@ -116,18 +117,19 @@ open class KmehrTestApplication {
             )
 
             val userLogin = generateEmail()
+            val userPwd = uuid()
             val createdUser = userApi.createUserInGroup(
                 testGroupId,
                 UserDto(
                     uuid(),
                     login = userLogin,
                     email = userLogin,
+                    passwordHash = userPwd,
                     healthcarePartyId = createdHcp.id
                 )
             )
 
             assignAdminPermissionToUser(testGroupId, createdUser.id)
-            val userPwd = userApi.getTokenInGroup(testGroupId, createdUser.id, uuid(), uuid(), 24 * 60 * 60)
             checkIfUserIsAvailable(userLogin, userPwd)
 
             internalDaos.forEach {
@@ -153,7 +155,7 @@ open class KmehrTestApplication {
     }.collect()
 
     private suspend fun assignAdminPermissionToUser(groupId: String, userId: String) = flow<Unit> {
-        PermissionApi(basePath = baseICurePath, authProvider = BasicAuthProvider("john", "LetMeIn"))
+        PermissionApi(basePath = baseICurePath, authProvider = JWTProvider(baseICurePath, "john", "LetMeIn"))
             .modifyUserPermissions(
                 "$groupId:$userId",
                 PermissionDto(
