@@ -1,5 +1,7 @@
 package org.taktik.icure.asynclogic.bridge
 
+import io.icure.kraken.client.infrastructure.ClientException
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -65,7 +67,9 @@ private fun StringSpec.userLogicBridgeTest(
 
     "Getting a user that does not exists returns null" {
         withAuthenticatedReactorContext(credentials) {
-            userBridge.getUser(uuid()) shouldBe null
+            shouldThrow<ClientException> { userBridge.getUser(uuid()) }.also {
+                it.statusCode shouldBe 404
+            }
         }
     }
 

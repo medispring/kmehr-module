@@ -29,11 +29,7 @@ class EntityReferenceLogicBridge(
     }
 
     override suspend fun getLatest(prefix: String): EntityReference? =
-        try {
-            getApi()?.getLatest(prefix)?.let( entityReferenceMapper::map)
-        } catch (e: ClientException) {
-            null
-        }
+        getApi()?.getLatest(prefix)?.let(entityReferenceMapper::map)
 
     override fun createEntities(entities: Collection<EntityReference>): Flow<EntityReference> = flow {
         emitAll(

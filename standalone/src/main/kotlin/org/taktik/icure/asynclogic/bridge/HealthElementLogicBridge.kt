@@ -44,8 +44,6 @@ class HealthElementLogicBridge(
             ?.onEach { emit(it) }
     }
 
-
-
     override fun deleteHealthElements(ids: Set<String>): Flow<DocIdentifier> {
         throw BridgeException()
     }

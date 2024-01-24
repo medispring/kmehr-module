@@ -1,7 +1,6 @@
 package org.taktik.icure.asynclogic.bridge
 
 import io.icure.kraken.client.apis.ContactApi
-import io.icure.kraken.client.infrastructure.ClientException
 import io.icure.kraken.client.security.ExternalJWTProvider
 import io.jsonwebtoken.JwtException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,7 +44,7 @@ class ContactLogicBridge(
     }
 
     override suspend fun createContact(contact: Contact): Contact? =
-        getApi()?.createContact(contactMapper.map(contact))?.let { contactMapper.map(it) }
+        getApi()?.createContact(contactMapper.map(contact))?.let(contactMapper::map)
 
     override fun createContacts(contacts: Flow<Contact>): Flow<Contact> {
         throw BridgeException()
@@ -85,9 +84,8 @@ class ContactLogicBridge(
         throw BridgeException()
     }
 
-    override suspend fun getContact(id: String): Contact? {
-        throw BridgeException()
-    }
+    override suspend fun getContact(id: String): Contact? =
+        getApi()?.getContact(id)?.let(contactMapper::map)
 
     override fun getContacts(selectedIds: Collection<String>): Flow<Contact> {
         throw BridgeException()
@@ -296,13 +294,11 @@ class ContactLogicBridge(
     }
 
     override fun modifyEntities(entities: Flow<Contact>): Flow<Contact> = flow {
-        try{
-            emitAll(
-                getApi()?.modifyContacts(
-                    entities.map(contactMapper::map).toList()
-                )?.map(contactMapper::map)?.asFlow() ?: emptyFlow()
-            )
-        } catch (_: ClientException) { }
+        emitAll(
+            getApi()?.modifyContacts(
+                entities.map(contactMapper::map).toList()
+            )?.map(contactMapper::map)?.asFlow() ?: emptyFlow()
+        )
     }
 
     override fun modifyEntities(entities: Collection<Contact>): Flow<Contact> = modifyEntities(entities.asFlow())

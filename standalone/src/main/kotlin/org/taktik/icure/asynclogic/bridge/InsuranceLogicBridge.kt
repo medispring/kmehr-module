@@ -41,11 +41,9 @@ class InsuranceLogicBridge(
     }
 
     override suspend fun getInsurance(insuranceId: String): Insurance? =
-        try {
-            getApi()?.getInsurance(insuranceId)?.let {
-                insuranceMapper.map(it)
-            }
-        } catch (_: ClientException) { null }
+        getApi()?.getInsurance(insuranceId)?.let {
+            insuranceMapper.map(it)
+        }
 
     override fun getInsurances(ids: Set<String>): Flow<Insurance> {
         throw BridgeException()

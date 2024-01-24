@@ -208,11 +208,7 @@ class PatientLogicBridge(
     }
 
     override suspend fun getPatient(patientId: String): Patient? =
-        try {
-            getApi()?.getPatient(patientId)?.let { patientMapper.map(it) }
-        } catch (e: ClientException) {
-            null
-        }
+        getApi()?.getPatient(patientId)?.let { patientMapper.map(it) }
 
     override fun getPatients(patientIds: Collection<String>): Flow<Patient> = flow {
         emitAll(

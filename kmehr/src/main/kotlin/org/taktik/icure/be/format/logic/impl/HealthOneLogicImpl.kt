@@ -62,9 +62,16 @@ class HealthOneLogicImpl(
             val r = StringReader(text)
             val lls = parseReportsAndLabs(language, protocolIds, r)
             val subContactsWithServices = fillContactWithLines(lls, planOfActionId, hcpId, protocolIds, formIds)
-            contactLogic.modifyEntities(
-                listOf(ctc.copy(subContacts = ctc.subContacts + subContactsWithServices.map { it.first }, services = ctc.services + subContactsWithServices.flatMap { it.second }))
-            ).firstOrNull()
+            val updatedContact = ctc.copy(subContacts = ctc.subContacts + subContactsWithServices.map { it.first }, services = ctc.services + subContactsWithServices.flatMap { it.second })
+            if(ctc.rev != null) {
+                contactLogic.modifyEntities(listOf(updatedContact)).firstOrNull()
+                    ?: throw IllegalArgumentException("Cannot update contact ${ctc.id}, check the revision or your access to it")
+            } else {
+                if (updatedContact.delegations.isEmpty() && updatedContact.securityMetadata?.secureDelegations.isNullOrEmpty()) {
+                    throw IllegalArgumentException("Cannot create a Contact with no delegation")
+                }
+                contactLogic.createContact(updatedContact)
+            }
         } else {
             throw UnsupportedCharsetException("Charset could not be detected")
         }
