@@ -9,6 +9,8 @@ import io.icure.kraken.client.crypto.toPrivateKey
 import io.icure.kraken.client.crypto.toPublicKey
 import io.icure.kraken.client.models.LoginCredentials
 import io.icure.kraken.client.security.BasicAuthProvider
+import io.icure.kraken.client.security.JWTProvider
+import io.kotest.matchers.nulls.shouldNotBeNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.reactor.asCoroutineContext
@@ -70,7 +72,7 @@ suspend fun createHealthcarePartyUser(iCureUrl: String, username: String, passwo
     val rsaKeyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair()
     val pubKey = rsaKeyPair.public.encoded.keyToHexString()
 
-    val hcp = HealthcarePartyApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
+    val hcp = HealthcarePartyApi(basePath = iCureUrl, authProvider = JWTProvider(iCureUrl, username, password))
         .createHealthcareParty(
             HealthcarePartyDto(
                 id = uuid(),
@@ -80,30 +82,17 @@ suspend fun createHealthcarePartyUser(iCureUrl: String, username: String, passwo
             )
         )
 
-    val user = UserApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
+    val userPassword = uuid()
+    val user = UserApi(basePath = iCureUrl, authProvider = JWTProvider(iCureUrl, username, password))
         .createUser(
             UserDto(
                 id = uuid(),
                 login = login,
                 email = login,
+                passwordHash = userPassword,
                 healthcarePartyId = hcp.id
             )
         )
-
-    PermissionApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
-        .modifyUserPermissions(
-            "${user.groupId}:${user.id}",
-            PermissionDto(
-                grants = setOf(
-                    AlwaysPermissionItemDto(
-                        PermissionTypeDto.LEGACY_DATA_VIEW
-                    )
-                )
-            )
-        )
-
-    val userPassword = UserApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
-        .getToken(user.id, uuid(), 24 * 60 * 60)
 
     val authJwt = getAuthJWT(iCureUrl, login, userPassword)
 
@@ -125,7 +114,7 @@ suspend fun createPatientUser(iCureUrl: String, username: String, password: Stri
     val rsaKeyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair()
     val pubKey = rsaKeyPair.public.encoded.keyToHexString()
 
-    val patient = PatientApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
+    val patient = PatientApi(basePath = iCureUrl, authProvider = JWTProvider(iCureUrl, username, password))
         .createPatient(
             PatientDto(
                 id = uuid(),
@@ -135,18 +124,17 @@ suspend fun createPatientUser(iCureUrl: String, username: String, password: Stri
             )
         )
 
-    val user = UserApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
+    val userPassword = uuid()
+    val user = UserApi(basePath = iCureUrl, authProvider = JWTProvider(iCureUrl, username, password))
         .createUser(
             UserDto(
                 id = uuid(),
                 login = login,
                 email = login,
+                passwordHash = userPassword,
                 patientId = patient.id
             )
         )
-
-    val userPassword = UserApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
-        .getToken(user.id, uuid(), 24 * 60 * 60)
 
     val authJwt = getAuthJWT(iCureUrl, login, userPassword)
 
@@ -167,19 +155,18 @@ suspend fun createAdminUser(iCureUrl: String, username: String, password: String
     val rsaKeyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair()
     val pubKey = rsaKeyPair.public.encoded.keyToHexString()
 
-    val user = UserApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
+    val userPassword = uuid()
+    val user = UserApi(basePath = iCureUrl, authProvider = JWTProvider(iCureUrl, username, password))
         .createUser(
             UserDto(
                 id = uuid(),
                 login = login,
-                email = login
+                email = login,
+                passwordHash = userPassword
             )
         )
 
-    val userPassword = UserApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
-        .getToken(user.id, uuid(), 24 * 60 * 60)
-
-    PermissionApi(basePath = iCureUrl, authProvider = BasicAuthProvider(username, password))
+    PermissionApi(basePath = iCureUrl, authProvider = JWTProvider(iCureUrl, username, password))
         .modifyUserPermissions(
             "${user.groupId}:${user.id}",
             PermissionDto(
@@ -208,8 +195,8 @@ suspend fun <T> withAuthenticatedReactorContext(credentials: UserCredentials, bl
     val fakeSecurityContext = object : SecurityContext {
 
         var auth: Authentication = EncodedJWTAuth(
-            token = credentials.authJWT!!,
-            claims = credentials.jwtClaims!!,
+            token = credentials.authJWT.shouldNotBeNull(),
+            claims = credentials.jwtClaims.shouldNotBeNull(),
             authorities = mutableSetOf(
                 SimpleGrantedAuthority(Roles.GrantedAuthority.ROLE_USER),
                 SimpleGrantedAuthority(Roles.GrantedAuthority.ROLE_HCP)

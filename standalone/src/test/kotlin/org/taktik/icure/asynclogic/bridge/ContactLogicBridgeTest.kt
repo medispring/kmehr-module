@@ -1,6 +1,5 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.apis.*
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -11,9 +10,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.Contact
 import org.taktik.icure.entities.base.CodeStub
@@ -24,21 +20,13 @@ import org.taktik.icure.services.external.rest.v2.mapper.embed.ServiceV2Mapper
 import org.taktik.icure.test.*
 import kotlin.random.Random
 
-@SpringBootTest(
-    classes = [KmehrTestApplication::class],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true"
-    ],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@ActiveProfiles(profiles = ["kmehr"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ContactLogicBridgeTest(
-    @Autowired val bridgeConfig: BridgeConfig,
-    @Autowired val serviceMapper: ServiceV2Mapper,
-    @Autowired val contactMapper: ContactV2Mapper,
-    @Autowired val jwtUtils: JwtUtils
-) : StringSpec() {
+    val bridgeConfig: BridgeConfig,
+    val serviceMapper: ServiceV2Mapper,
+    val contactMapper: ContactV2Mapper,
+    val jwtUtils: JwtUtils
+) : BaseKmehrTest() {
 
     init {
         runBlocking {

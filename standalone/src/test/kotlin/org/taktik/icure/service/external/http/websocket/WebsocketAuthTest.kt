@@ -14,32 +14,21 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.websocket.*
 import org.junit.jupiter.api.TestInstance
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.test.context.ActiveProfiles
 import org.taktik.icure.asynclogic.impl.JwtResponse
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.services.external.rest.v2.dto.LoginCredentials
+import org.taktik.icure.test.BaseKmehrTest
 import org.taktik.icure.test.KmehrTestApplication
 import org.taktik.icure.test.getAuthJWT
 import org.taktik.icure.test.uuid
 
-@SpringBootTest(
-    classes = [KmehrTestApplication::class],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true",
-        "icure.bridge.kmehrLogin=john",
-        "icure.bridge.kmehrPwd=LetMeIn"
-    ],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@ActiveProfiles(profiles = ["kmehr"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class WebsocketAuthTest(
     @LocalServerPort val port: Int,
     val bridgeConfig: BridgeConfig,
     private val objectMapper: ObjectMapper
-) : StringSpec({
+) : BaseKmehrTest() {
 
     val client = HttpClient(CIO) {
         install(WebSockets)
@@ -48,40 +37,45 @@ class WebsocketAuthTest(
         }
     }
 
-    "Can use JWT authentication on WebSocket using Authorization header" {
-        val token = getAuthJWT(bridgeConfig.iCureUrl, KmehrTestApplication.masterHcp.login, KmehrTestApplication.masterHcp.password)
-        client.webSocket(host = "127.0.0.1", port = port, path = "/ws/fake/echo", request = {
-            headers.append("Authorization", "Bearer $token")
-        }) {
-            send(Frame.Text(uuid()))
-            val echoedMessage = incoming.receiveCatching().getOrNull() as? Frame.Text ?: error("No message")
-            echoedMessage.readText() shouldBe KmehrTestApplication.masterHcp.dataOwnerId
+    init {
+        testWebSocket()
+    }
+
+    private fun StringSpec.testWebSocket() {
+        "Can use JWT authentication on WebSocket using Authorization header" {
+            val token = getAuthJWT(bridgeConfig.iCureUrl, KmehrTestApplication.masterHcp.login, KmehrTestApplication.masterHcp.password)
+            client.webSocket(host = "127.0.0.1", port = port, path = "/ws/fake/echo", request = {
+                headers.append("Authorization", "Bearer $token")
+            }) {
+                send(Frame.Text(uuid()))
+                val echoedMessage = incoming.receiveCatching().getOrNull() as? Frame.Text ?: error("No message")
+                echoedMessage.readText() shouldBe KmehrTestApplication.masterHcp.dataOwnerId
+            }
+        }
+
+        "Can use JWT authentication on WebSocket using a path parameter" {
+            val token = getAuthJWT(bridgeConfig.iCureUrl, KmehrTestApplication.masterHcp.login, KmehrTestApplication.masterHcp.password)
+            client.webSocket(host = "127.0.0.1", port = port, path = "/ws/fake/echo?jwt=$token") {
+                send(Frame.Text(uuid()))
+                val echoedMessage = incoming.receiveCatching().getOrNull() as? Frame.Text ?: error("No message")
+                echoedMessage.readText() shouldBe KmehrTestApplication.masterHcp.dataOwnerId
+            }
+        }
+
+        "If the JWT sent to the WS operation expires, is automatically refreshed mid-request" {
+            val shortLivedToken = client.post("${bridgeConfig.iCureUrl}/rest/v2/auth/login?duration=5") {
+                contentType(ContentType.Application.Json)
+                setBody(objectMapper.writeValueAsString(LoginCredentials().apply {
+                    username = "${KmehrTestApplication.groupId}/${KmehrTestApplication.masterHcp.userId}"
+                    password = KmehrTestApplication.masterHcp.password
+                }))
+            }.let { objectMapper.readValue<JwtResponse>(it.bodyAsText()) }.token
+            client.webSocket(host = "127.0.0.1", port = port, path = "/ws/fake/slowOp?jwt=$shortLivedToken") {
+                send(Frame.Text(uuid()))
+                val echoedMessage = incoming.receiveCatching().getOrNull() as? Frame.Text ?: error("No message")
+                echoedMessage.readText() shouldBe KmehrTestApplication.masterHcp.dataOwnerId
+            }
         }
     }
 
-    "Can use JWT authentication on WebSocket using a path parameter" {
-        val token = getAuthJWT(bridgeConfig.iCureUrl, KmehrTestApplication.masterHcp.login, KmehrTestApplication.masterHcp.password)
-        client.webSocket(host = "127.0.0.1", port = port, path = "/ws/fake/echo?jwt=$token") {
-            send(Frame.Text(uuid()))
-            val echoedMessage = incoming.receiveCatching().getOrNull() as? Frame.Text ?: error("No message")
-            echoedMessage.readText() shouldBe KmehrTestApplication.masterHcp.dataOwnerId
-        }
-    }
-
-    "If the JWT sent to the WS operation expires, is automatically refreshed mid-request" {
-        val shortLivedToken = client.post("${bridgeConfig.iCureUrl}/rest/v2/auth/login?duration=5") {
-            contentType(ContentType.Application.Json)
-            setBody(objectMapper.writeValueAsString(LoginCredentials().apply {
-                username = "${KmehrTestApplication.groupId}/${KmehrTestApplication.masterHcp.userId}"
-                password = KmehrTestApplication.masterHcp.password
-            }))
-        }.let { objectMapper.readValue<JwtResponse>(it.bodyAsText()) }.token
-        client.webSocket(host = "127.0.0.1", port = port, path = "/ws/fake/slowOp?jwt=$shortLivedToken") {
-            send(Frame.Text(uuid()))
-            val echoedMessage = incoming.receiveCatching().getOrNull() as? Frame.Text ?: error("No message")
-            echoedMessage.readText() shouldBe KmehrTestApplication.masterHcp.dataOwnerId
-        }
-    }
-
-
-})
+}

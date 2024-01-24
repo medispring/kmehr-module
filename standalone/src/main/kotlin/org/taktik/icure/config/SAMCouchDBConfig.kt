@@ -23,14 +23,14 @@ import java.time.Duration
 @OptIn(ExperimentalCoroutinesApi::class)
 @Profile("sam")
 @Configuration
-open class SAMCouchDBConfig(
+class SAMCouchDBConfig(
     private val credentialsProvider: SAMCouchDBCredentialsProvider
 ) {
 
     private val log = LogFactory.getLog("org.taktik.icure.config.WebClient")
 
     @Bean
-    open fun connectionProvider(): ConnectionProvider {
+    fun connectionProvider(): ConnectionProvider {
         return ConnectionProvider.builder("LARGE_POOL")
             .maxConnections(50000)
             .maxIdleTime(Duration.ofSeconds(120))
@@ -38,7 +38,7 @@ open class SAMCouchDBConfig(
     }
 
     @Bean
-    open fun httpClient(connectionProvider: ConnectionProvider) = SpringWebfluxWebClient(
+    fun httpClient(connectionProvider: ConnectionProvider) = SpringWebfluxWebClient(
         ReactorClientHttpConnector(
             HttpClient
                 .create(connectionProvider)
@@ -62,7 +62,7 @@ open class SAMCouchDBConfig(
     }
 
     @Bean
-    open fun drugCouchDbDispatcher(
+    fun drugCouchDbDispatcher(
         httpClient: WebClient,
         objectMapper: ObjectMapper
     ) = SAMCouchDBDispatcher(
@@ -75,7 +75,7 @@ open class SAMCouchDBConfig(
     )
 
     @Bean
-    open fun chapIVCouchDbDispatcher(
+    fun chapIVCouchDbDispatcher(
         httpClient: WebClient,
         objectMapper: ObjectMapper
     ) = SAMCouchDBDispatcher(
