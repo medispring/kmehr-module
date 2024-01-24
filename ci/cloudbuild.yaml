@@ -33,6 +33,6 @@ availableSecrets:
 
 options:
   pool:
-    name: "projects/taktik-dev/locations/europe-west1/workerPools/taktik-gcb-medium-pool"
+    name: "projects/taktik-dev/locations/europe-west1/workerPools/taktik-gcb-large-pool"
 
 timeout: 2700s
