@@ -351,6 +351,7 @@ class KmehrWsController(
                             operation.binaryResponse(smfExport)
                         } catch (e: Exception) {
                             log.error("Cannot generate SMF", e)
+                            operation.errorResponse(e)
                         }
                     }
                 }
