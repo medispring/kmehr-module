@@ -1,7 +1,8 @@
 map = function(doc) {
     var normalize_substrings = function(text,latin_map) {
-        return text.trim().split(/[ |/]+/).map(function(word) {
-            return word.toLowerCase().replace(/[^A-Za-z0-9]/g,function(a){return latin_map[a]||""});
+        return text.trim().split(/[ |/]+/).flatMap(function(word) {
+            var normalized = word.toLowerCase().replace(/[^A-Za-z0-9-]/g,function(a){return latin_map[a]||""});
+            return (normalized.includes("-") ? [normalized, normalized.replace('-','')].concat(normalized.split('-')) : [normalized]).filter((x) => x !== '-');
         });
     };
 
