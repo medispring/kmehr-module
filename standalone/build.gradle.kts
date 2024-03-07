@@ -109,14 +109,12 @@ dependencies {
 
     implementation(coreLibs.ktorSerialization)
 
-    implementation(coreLibs.javaxServlet)
-
     implementation(coreLibs.asyncJacksonHttpClient)
 
     implementation(coreLibs.caffeine)
     implementation(coreLibs.springBootCache)
 
-    implementation(coreLibs.jaxbApi)
+    implementation(kmehrLibs.jaxbApi)
 
     implementation(coreLibs.taktikBoot)
 

@@ -1,7 +1,6 @@
 package org.taktik.icure.asynclogic.bridge
 
 import io.icure.kraken.client.apis.PatientApi
-import io.icure.kraken.client.infrastructure.ClientException
 import io.icure.kraken.client.models.filter.AbstractFilterDto
 import io.icure.kraken.client.security.ExternalJWTProvider
 import io.jsonwebtoken.JwtException
@@ -29,6 +28,7 @@ import org.taktik.icure.entities.embed.Identifier
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
 import org.taktik.icure.exceptions.BridgeException
+import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
 import org.taktik.icure.services.external.rest.v2.dto.PatientDto
 import org.taktik.icure.services.external.rest.v2.mapper.PatientV2Mapper
@@ -93,26 +93,10 @@ class PatientLogicBridge(
         throw BridgeException()
     }
 
-    override fun findByHcPartyAndSsinOrDateOfBirthOrNameContainsFuzzy(
-        healthcarePartyId: String,
-        offset: PaginationOffset<List<String>>,
-        searchString: String?,
-        sorting: Sorting,
-    ): Flow<ViewQueryResultEvent> {
-        throw BridgeException()
-    }
-
     override fun findByHcPartyDateOfBirth(
         date: Int?,
         healthcarePartyId: String,
         paginationOffset: PaginationOffset<List<String>>,
-    ): Flow<ViewQueryResultEvent> {
-        throw BridgeException()
-    }
-
-    override fun findByHcPartyIdsOnly(
-        healthcarePartyId: String,
-        offset: PaginationOffset<List<String>>,
     ): Flow<ViewQueryResultEvent> {
         throw BridgeException()
     }
@@ -127,15 +111,6 @@ class PatientLogicBridge(
         throw BridgeException()
     }
 
-    override fun findByHcPartyNameContainsFuzzy(
-        searchString: String?,
-        healthcarePartyId: String,
-        offset: PaginationOffset<*>,
-        descending: Boolean,
-    ): Flow<ViewQueryResultEvent> {
-        throw BridgeException()
-    }
-
     override suspend fun findByUserId(id: String): Patient? {
         throw BridgeException()
     }
@@ -145,25 +120,7 @@ class PatientLogicBridge(
         end: Long?,
         descending: Boolean,
         paginationOffset: PaginationOffset<Long>,
-    ): Flow<ViewQueryResultEvent> {
-        throw BridgeException()
-    }
-
-    override fun findOfHcPartyNameContainsFuzzy(
-        searchString: String?,
-        healthcarePartyId: String,
-        offset: PaginationOffset<*>,
-        descending: Boolean,
-    ): Flow<ViewQueryResultEvent> {
-        throw BridgeException()
-    }
-
-    override fun findOfHcPartyAndSsinOrDateOfBirthOrNameContainsFuzzy(
-        healthcarePartyId: String,
-        offset: PaginationOffset<ComplexKey>,
-        searchString: String?,
-        sorting: Sorting
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -180,25 +137,32 @@ class PatientLogicBridge(
         throw BridgeException()
     }
 
-    override suspend fun getByExternalId(externalId: String): Patient? {
-        throw BridgeException()
-    }
-
-    override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
-        throw BridgeException()
-    }
-
-    override fun getDuplicatePatientsByName(
-        healthcarePartyId: String,
-        paginationOffset: PaginationOffset<List<String>>,
-    ): Flow<ViewQueryResultEvent> {
+    override fun listOfPatientsModifiedAfter(
+        date: Long,
+        paginationOffset: PaginationOffset<Long>
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
     override fun getDuplicatePatientsBySsin(
         healthcarePartyId: String,
-        paginationOffset: PaginationOffset<List<String>>,
-    ): Flow<ViewQueryResultEvent> {
+        paginationOffset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
+        throw BridgeException()
+    }
+
+    override fun getDuplicatePatientsByName(
+        healthcarePartyId: String,
+        paginationOffset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
+        throw BridgeException()
+    }
+
+    override suspend fun getByExternalId(externalId: String): Patient? {
+        throw BridgeException()
+    }
+
+    override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
         throw BridgeException()
     }
 
@@ -321,12 +285,19 @@ class PatientLogicBridge(
         throw BridgeException()
     }
 
-    override fun listOfPatientsModifiedAfter(
-        date: Long,
-        startKey: Long?,
-        startDocumentId: String?,
-        limit: Int?,
-    ): Flow<ViewQueryResultEvent> {
+    override fun findByHcPartyIdsOnly(
+        healthcarePartyId: String,
+        offset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
+        throw BridgeException()
+    }
+
+    override fun findByHcPartyAndSsinOrDateOfBirthOrNameContainsFuzzy(
+        healthcarePartyId: String,
+        offset: PaginationOffset<ComplexKey>,
+        searchString: String?,
+        sorting: Sorting<PatientLogic.Companion.PatientSearchField>
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -360,6 +331,33 @@ class PatientLogicBridge(
         sort: String?,
         desc: Boolean?,
     ): Flow<ViewQueryResultEvent> {
+        throw BridgeException()
+    }
+
+    override fun findByHcPartyNameContainsFuzzy(
+        searchString: String?,
+        healthcarePartyId: String,
+        offset: PaginationOffset<ComplexKey>,
+        descending: Boolean
+    ): Flow<ViewQueryResultEvent> {
+        throw BridgeException()
+    }
+
+    override fun findOfHcPartyNameContainsFuzzy(
+        searchString: String?,
+        healthcarePartyId: String,
+        offset: PaginationOffset<ComplexKey>,
+        descending: Boolean
+    ): Flow<ViewQueryResultEvent> {
+        throw BridgeException()
+    }
+
+    override fun findOfHcPartyAndSsinOrDateOfBirthOrNameContainsFuzzy(
+        healthcarePartyId: String,
+        offset: PaginationOffset<ComplexKey>,
+        searchString: String?,
+        sorting: Sorting<PatientLogic.Companion.PatientSearchField>
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 

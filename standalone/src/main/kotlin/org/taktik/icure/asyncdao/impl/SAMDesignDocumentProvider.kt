@@ -21,12 +21,17 @@ class SAMDesignDocumentProvider: DesignDocumentProvider {
         secondaryPartition: String?
     ): String = baseDesignDocumentId(entityClass, secondaryPartition)
 
-    override fun currentDesignDocumentId(
+    override suspend fun generateDesignDocuments(
+        entityClass: Class<*>,
+        metaDataSource: Any,
+        client: Client?
+    ): Set<DesignDocument> =
+        StdDesignDocumentFactory().generateFrom(baseDesignDocumentId(entityClass), metaDataSource, useVersioning = false)
+
+    override suspend fun currentDesignDocumentId(
         entityClass: Class<*>,
         metaDataSource: Any,
         secondaryPartition: String?
     ): String = baseDesignDocumentId(entityClass, secondaryPartition)
 
-    override fun generateDesignDocuments(entityClass: Class<*>, metaDataSource: Any): Set<DesignDocument> =
-        StdDesignDocumentFactory().generateFrom(baseDesignDocumentId(entityClass), metaDataSource, useVersioning = false)
 }

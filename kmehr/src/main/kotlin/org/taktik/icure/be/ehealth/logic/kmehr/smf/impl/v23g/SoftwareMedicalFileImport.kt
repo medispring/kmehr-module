@@ -525,6 +525,7 @@ class SoftwareMedicalFileImport(
                                                 flowOf(DefaultDataBufferFactory.sharedInstance.wrap(lnk.value)),
                                                 lnk.value.size.toLong(),
                                                 listOf(mainUti) + otherUtis,
+                                                false
                                             ),
                                         )
                                     }

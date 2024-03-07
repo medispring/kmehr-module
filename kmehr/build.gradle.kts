@@ -57,8 +57,8 @@ dependencies {
 
     implementation(kmehrLibs.commonsCodec)
 
-    implementation(coreLibs.jaxbApi)
-    implementation(coreLibs.jaxbRuntime)
+    implementation(kmehrLibs.jaxbApi)
+    implementation(kmehrLibs.jaxbRuntime)
 
     implementation(coreLibs.commonsIO)
 
@@ -72,7 +72,5 @@ dependencies {
 
     implementation(coreLibs.mapstruct)
     implementation(coreLibs.kmapKsp)
-
-    implementation(coreLibs.javaxServlet)
 
 }

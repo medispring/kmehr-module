@@ -55,10 +55,6 @@ class BridgeAsyncSessionLogic(
         }
     }
 
-    override fun getOrCreateSession(): javax.servlet.http.HttpSession? {
-        throw BridgeException()
-    }
-
     override suspend fun getAuthentication(): Authentication {
         throw BridgeException()
     }

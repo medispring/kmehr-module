@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.ViewQueryResultEvent
+import org.taktik.couchdb.entity.ComplexKey
 import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.InvoiceLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
@@ -25,6 +26,7 @@ import org.taktik.icure.entities.embed.MediumType
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
 import org.taktik.icure.exceptions.BridgeException
+import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
 import org.taktik.icure.services.external.rest.v2.mapper.InvoiceV2Mapper
 
@@ -66,16 +68,16 @@ class InvoiceLogicBridge(
         throw BridgeException()
     }
 
+    override suspend fun addDelegation(invoiceId: String, delegation: Delegation): Invoice? {
+        throw BridgeException()
+    }
+
     override fun findInvoicesByAuthor(
         hcPartyId: String,
         fromDate: Long?,
         toDate: Long?,
-        paginationOffset: PaginationOffset<List<*>>,
-    ): Flow<ViewQueryResultEvent> {
-        throw BridgeException()
-    }
-
-    override suspend fun addDelegation(invoiceId: String, delegation: Delegation): Invoice? {
+        paginationOffset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -123,10 +125,6 @@ class InvoiceLogicBridge(
         throw BridgeException()
     }
 
-    override fun listInvoicesByHcPartyAndPatientSks(hcParty: String, secretPatientKeys: Set<String>): Flow<Invoice> {
-        throw BridgeException()
-    }
-
     override fun listInvoicesByHcPartyAndPatientSksUnsent(
         hcParty: String,
         secretPatientKeys: Set<String>,
@@ -135,6 +133,18 @@ class InvoiceLogicBridge(
     }
 
     override fun listInvoicesByHcPartyAndRecipientIds(hcParty: String, recipientIds: Set<String?>): Flow<Invoice> {
+        throw BridgeException()
+    }
+
+    override fun listInvoicesByHcPartyAndPatientSfks(hcParty: String, secretPatientKeys: Set<String>): Flow<Invoice> {
+        throw BridgeException()
+    }
+
+    override fun listInvoicesByHcPartyAndPatientSfk(
+        hcParty: String,
+        secretPatientKey: String,
+        offset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 

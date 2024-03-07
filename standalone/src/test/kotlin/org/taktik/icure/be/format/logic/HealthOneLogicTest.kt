@@ -1,6 +1,5 @@
 package org.taktik.icure.be.format.logic
 
-import io.icure.kraken.client.infrastructure.ClientException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -98,7 +97,8 @@ class HealthOneLogicTest(
             DataAttachmentChange.CreateOrUpdate(
                 flowOf(ByteBuffer.wrap(fakeAttachment).toDataBuffer()),
                 fakeAttachment.size.toLong(),
-                listOf("public.plain-text")
+                listOf("public.plain-text"),
+                false
             )
         ).shouldNotBeNull()
     }

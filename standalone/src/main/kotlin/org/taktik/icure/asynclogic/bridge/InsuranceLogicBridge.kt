@@ -1,19 +1,18 @@
 package org.taktik.icure.asynclogic.bridge
 
 import io.icure.kraken.client.apis.InsuranceApi
-import io.icure.kraken.client.infrastructure.ClientException
 import io.icure.kraken.client.security.ExternalJWTProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
-import org.taktik.couchdb.ViewRowWithDoc
 import org.taktik.icure.asynclogic.InsuranceLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.entities.Insurance
 import org.taktik.icure.exceptions.BridgeException
+import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.mapper.InsuranceV2Mapper
 
 @OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
@@ -36,7 +35,7 @@ class InsuranceLogicBridge(
         throw BridgeException()
     }
 
-    override fun getAllInsurances(paginationOffset: PaginationOffset<Nothing>): Flow<ViewRowWithDoc<Any?, String, Insurance>> {
+    override fun getAllInsurances(paginationOffset: PaginationOffset<Nothing>): Flow<PaginationElement> {
         throw BridgeException()
     }
 
