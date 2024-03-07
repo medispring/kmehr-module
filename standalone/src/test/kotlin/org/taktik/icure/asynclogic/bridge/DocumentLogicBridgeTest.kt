@@ -125,7 +125,8 @@ private fun StringSpec.documentLogicBridgeTest(
                 DataAttachmentChange.CreateOrUpdate(
                     flowOf(ByteBuffer.wrap(fakeAttachment).toDataBuffer()),
                     fakeAttachment.size.toLong(),
-                    listOf("public.plain-text")
+                    listOf("public.plain-text"),
+                    false
                 )
             ).shouldNotBeNull()
             documentBridge.getMainAttachment(documentWithAttachment.id).map {

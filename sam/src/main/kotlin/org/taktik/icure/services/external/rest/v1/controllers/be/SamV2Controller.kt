@@ -63,7 +63,6 @@ import reactor.core.publisher.Mono
 import java.net.URI
 import java.nio.ByteBuffer
 import java.util.*
-import javax.servlet.http.HttpServletResponse
 
 @Profile("sam")
 @RestController
@@ -495,7 +494,7 @@ class SamV2Controller(
         return samV2Logic.listPharmaceuticalForms().map { pharmaceuticalFormMapper.map(it) }.injectReactorContext()
     }
 
-    @GetMapping("/chap/{chapterName}/{paragraphName}/{verseSeq}/addeddoc/{docSeq}/{language}", produces = ["application/octet-stream"])
+    @GetMapping("/chap/{chapterName}/{paragraphName}/{verseSeq}/addeddoc/{docSeq}/{language}", produces = [MediaType.APPLICATION_PDF_VALUE])
     @ResponseBody
     fun getAddedDocument(
         @PathVariable chapterName: String,
@@ -503,10 +502,8 @@ class SamV2Controller(
         @PathVariable verseSeq: Long,
         @PathVariable docSeq: Long,
         @PathVariable language: String,
-        response: HttpServletResponse,
     ) = flow {
         samV2Logic.listVerses(chapterName, paragraphName).firstOrNull { it.verseSeq == verseSeq }?.addedDocuments?.find { d -> d.documentSeq == docSeq && d.verseSeq == verseSeq }?.addressUrl?.let {
-            response.contentType = MediaType.APPLICATION_PDF_VALUE
             val uri = URI(it.replace("@lng@", language))
             emitAll(proxyWebClient.get().uri(uri).retrieve().bodyToFlux(ByteBuffer::class.java).asFlow())
         }

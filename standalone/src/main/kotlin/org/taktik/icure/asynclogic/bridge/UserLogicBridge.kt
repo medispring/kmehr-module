@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.ViewQueryResultEvent
 import org.taktik.icure.asynclogic.UserLogic
-import org.taktik.icure.asynclogic.datastore.IDatastoreInformation
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.db.PaginationOffset
@@ -20,6 +19,7 @@ import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.User
 import org.taktik.icure.entities.base.PropertyStub
 import org.taktik.icure.exceptions.BridgeException
+import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.mapper.UnsecureUserV2Mapper
 
 @OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
@@ -115,15 +115,7 @@ class UserLogicBridge(
     override fun listUsers(
         paginationOffset: PaginationOffset<String>,
         skipPatients: Boolean
-    ): Flow<ViewQueryResultEvent> {
-        throw BridgeException()
-    }
-
-    override fun listUsers(
-        datastoreInformation: IDatastoreInformation,
-        pagination: PaginationOffset<String>,
-        skipPatients: Boolean
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 

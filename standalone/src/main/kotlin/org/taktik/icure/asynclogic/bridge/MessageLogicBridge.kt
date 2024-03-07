@@ -13,6 +13,7 @@ import org.taktik.icure.entities.embed.Delegation
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
 import org.taktik.icure.exceptions.BridgeException
+import org.taktik.icure.pagination.PaginationElement
 
 @Service
 class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
@@ -35,7 +36,7 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
     override fun findForHcPartySortedByReceived(
         hcPartyId: String,
         paginationOffset: PaginationOffset<ComplexKey>
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -70,7 +71,7 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         partyId: String,
         fromAddress: String,
         paginationOffset: PaginationOffset<ComplexKey>
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -79,7 +80,7 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         toAddress: String,
         paginationOffset: PaginationOffset<ComplexKey>,
         reverse: Boolean
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -87,15 +88,15 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         partyId: String,
         transportGuid: String?,
         paginationOffset: PaginationOffset<ComplexKey>
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
     override fun findMessagesByTransportGuid(
         partyId: String,
         transportGuid: String?,
-        paginationOffset: PaginationOffset<List<String?>>
-    ): Flow<ViewQueryResultEvent> {
+        paginationOffset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -109,7 +110,7 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         fromDate: Long,
         toDate: Long,
         paginationOffset: PaginationOffset<ComplexKey>
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -125,6 +126,14 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         hcPartyId: String,
         secretPatientKeys: List<String>
     ): Flow<Message> {
+        throw BridgeException()
+    }
+
+    override fun listMessagesByHcPartySecretPatientKey(
+        hcPartyId: String,
+        secretPatientKey: String,
+        paginationOffset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 

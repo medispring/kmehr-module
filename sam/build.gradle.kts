@@ -53,8 +53,6 @@ dependencies {
     implementation(coreLibs.mapstruct)
     implementation(coreLibs.kmapKsp)
 
-    implementation(coreLibs.javaxServlet)
-
     implementation(kmehrLibs.ajaltClikt)
 
     ksp(group = "io.icure", name = "kmap", version = coreLibs.versions.kmap.orNull)

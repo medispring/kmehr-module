@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.ViewQueryResultEvent
+import org.taktik.couchdb.entity.ComplexKey
 import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.ContactLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
@@ -26,6 +27,7 @@ import org.taktik.icure.entities.embed.Identifier
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
 import org.taktik.icure.exceptions.BridgeException
+import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
 import org.taktik.icure.services.external.rest.v2.mapper.ContactV2Mapper
 import org.taktik.icure.services.external.rest.v2.mapper.embed.ServiceV2Mapper
@@ -77,6 +79,15 @@ class ContactLogicBridge(
     }
 
     override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
+        throw BridgeException()
+    }
+
+    override fun listContactsByOpeningDate(
+        hcPartyId: String,
+        startOpeningDate: Long,
+        endOpeningDate: Long,
+        offset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -160,6 +171,15 @@ class ContactLogicBridge(
                 ?.asFlow() ?: emptyFlow()
         )
     }
+
+    override fun listContactByHCPartyIdAndSecretPatientKey(
+        hcPartyId: String,
+        secretPatientKey: String,
+        paginationOffset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
+        throw BridgeException()
+    }
+
     override fun listContactsByHcPartyAndFormId(hcPartyId: String, formId: String): Flow<Contact> {
         throw BridgeException()
     }
@@ -169,15 +189,6 @@ class ContactLogicBridge(
     }
 
     override fun listContactsByHcPartyServiceId(hcPartyId: String, serviceId: String): Flow<Contact> {
-        throw BridgeException()
-    }
-
-    override fun listContactsByOpeningDate(
-        hcPartyId: String,
-        startOpeningDate: Long,
-        endOpeningDate: Long,
-        offset: PaginationOffset<List<String>>
-    ): Flow<ViewQueryResultEvent> {
         throw BridgeException()
     }
 

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.ViewQueryResultEvent
+import org.taktik.couchdb.entity.ComplexKey
 import org.taktik.icure.asynclogic.HealthcarePartyLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
@@ -23,6 +24,7 @@ import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.HealthcareParty
 import org.taktik.icure.entities.embed.Identifier
 import org.taktik.icure.exceptions.BridgeException
+import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.HealthcarePartyDto
 import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
 import org.taktik.icure.services.external.rest.v2.mapper.HealthcarePartyV2Mapper
@@ -59,11 +61,11 @@ class HealthcarePartyLogicBridge(
         fuzzyName: String,
         offset: PaginationOffset<String>,
         desc: Boolean?,
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
-    override fun findHealthcarePartiesBy(offset: PaginationOffset<String>, desc: Boolean?): Flow<ViewQueryResultEvent> {
+    override fun findHealthcarePartiesBy(offset: PaginationOffset<String>, desc: Boolean?): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -71,7 +73,7 @@ class HealthcarePartyLogicBridge(
         searchValue: String,
         paginationOffset: PaginationOffset<String>,
         desc: Boolean,
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -124,6 +126,16 @@ class HealthcarePartyLogicBridge(
         throw BridgeException()
     }
 
+    override fun listHealthcarePartiesBySpecialityAndPostcode(
+        type: String,
+        spec: String,
+        firstCode: String,
+        lastCode: String,
+        offset: PaginationOffset<ComplexKey>
+    ): Flow<PaginationElement> {
+        throw BridgeException()
+    }
+
     override fun listHealthcarePartiesBy(searchString: String, offset: Int, limit: Int): Flow<HealthcareParty> {
         throw BridgeException()
     }
@@ -158,15 +170,6 @@ class HealthcarePartyLogicBridge(
         emitAll(
             findHealthcarePartiesByNameRecursive(name).map(healthcarePartyMapper::map)
         )
-    }
-
-    override fun listHealthcarePartiesBySpecialityAndPostcode(
-        type: String,
-        spec: String,
-        firstCode: String,
-        lastCode: String,
-    ): Flow<ViewQueryResultEvent> {
-        throw BridgeException()
     }
 
     private fun findHealthcarePartiesBySsinOrNihiiRecursive(

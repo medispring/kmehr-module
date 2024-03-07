@@ -182,7 +182,10 @@ class HealthOneLogicImpl(
     private fun importLaboResult(language: String, labResults: List<*>, position: Long, ril: ResultsInfosLine): List<org.taktik.icure.entities.embed.Service> =
         if (labResults.size > 1) {
             var lrl = labResults[0] as LaboResultLine
-            if (tryToGetValueAsNumber(lrl.value) != null) {
+            val laboResultLineValue = requireNotNull(lrl.value) {
+                "First line of lab result cannot be null"
+            }.replace("<".toRegex(), "").replace(">".toRegex(), "")
+            if (tryToGetValueAsNumber(laboResultLineValue) != null) {
                 val lrl2 = labResults[1] as LaboResultLine
                 val comment = (2 until labResults.size).fold((lrl2.value ?: "")) { acc, i ->
                     lrl = labResults[i] as LaboResultLine

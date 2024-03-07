@@ -54,7 +54,7 @@ class SAMCouchDBConfig(
         xff.add(
             ExchangeFilterFunction.ofRequestProcessor { req ->
                 if (log.isDebugEnabled) {
-                    log.debug("-> ${req.method().name} ${req.url()}")
+                    log.debug("-> ${req.method().name()} ${req.url()}")
                 }
                 Mono.just(req)
             }

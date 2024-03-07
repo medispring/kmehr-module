@@ -147,6 +147,7 @@ class KmehrReportLogicImpl(
                                                 flowOf(DefaultDataBufferFactory.sharedInstance.wrap(lnk.value)),
                                                 lnk.value.size.toLong(),
                                                 utis.takeIf { x -> x.isNotEmpty() }?.map { x -> x.identifier } ?: listOf("com.adobe.pdf"),
+                                                false
                                             )
                                         )
                                     }?.id

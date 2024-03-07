@@ -15,6 +15,7 @@ import org.taktik.icure.entities.base.Code
 import org.taktik.icure.entities.base.CodeStub
 import org.taktik.icure.errors.UnauthorizedException
 import org.taktik.icure.exceptions.BridgeException
+import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.mapper.base.CodeV2Mapper
 import java.io.InputStream
 
@@ -54,7 +55,7 @@ class CodeLogicBridge(
         code: String?,
         version: String?,
         paginationOffset: PaginationOffset<List<String?>>
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -65,7 +66,7 @@ class CodeLogicBridge(
         label: String,
         version: String?,
         paginationOffset: PaginationOffset<List<String?>>
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
@@ -78,7 +79,7 @@ class CodeLogicBridge(
         linkType: String,
         linkedId: String?,
         pagination: PaginationOffset<List<String>>
-    ): Flow<ViewQueryResultEvent> {
+    ): Flow<PaginationElement> {
         throw BridgeException()
     }
 
