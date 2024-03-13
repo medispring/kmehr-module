@@ -309,9 +309,15 @@ private fun StringSpec.healthcarePartyLogicBridgeTest(
         }
     }
 
-    "Can retrieve multiple HCPs by id, if none exist a empty flow is returned" {
+    "Can retrieve multiple HCPs by id, if none exist an empty flow is returned" {
         withAuthenticatedReactorContext(credentials) {
             hcpBridge.getHealthcareParties(List(3) { uuid() }).count() shouldBe 0
+        }
+    }
+
+    "Can retrieve multiple HCPs by id, if an empty list is passed then an empty flow is returned" {
+        withAuthenticatedReactorContext(credentials) {
+            hcpBridge.getHealthcareParties(emptyList()).count() shouldBe 0
         }
     }
 

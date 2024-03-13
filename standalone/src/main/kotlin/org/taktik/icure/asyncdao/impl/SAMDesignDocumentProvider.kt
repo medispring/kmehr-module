@@ -7,6 +7,7 @@ import org.taktik.couchdb.dao.DesignDocumentProvider
 import org.taktik.couchdb.dao.designDocName
 import org.taktik.couchdb.entity.DesignDocument
 import org.taktik.couchdb.support.StdDesignDocumentFactory
+import org.taktik.icure.asyncdao.Partitions
 
 @Profile("sam")
 @Service
@@ -24,7 +25,8 @@ class SAMDesignDocumentProvider: DesignDocumentProvider {
     override suspend fun generateDesignDocuments(
         entityClass: Class<*>,
         metaDataSource: Any,
-        client: Client?
+        client: Client?,
+        partition: Partitions
     ): Set<DesignDocument> =
         StdDesignDocumentFactory().generateFrom(baseDesignDocumentId(entityClass), metaDataSource, useVersioning = false)
 

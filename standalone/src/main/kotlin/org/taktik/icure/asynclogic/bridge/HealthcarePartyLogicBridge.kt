@@ -104,14 +104,15 @@ class HealthcarePartyLogicBridge(
     override suspend fun getHcpHierarchyIds(sender: HealthcareParty): HashSet<String> =
         getApi()?.let { getHcpHierarchyIdsRecursive(it, sender.id).toHashSet() } ?: HashSet()
 
-    override fun getHealthcareParties(ids: List<String>): Flow<HealthcareParty> = flow {
+    override fun getHealthcareParties(ids: List<String>): Flow<HealthcareParty> =
+        if(ids.isNotEmpty()) flow {
         emitAll(
             getApi()
                 ?.getHealthcareParties(ListOfIdsDto( ids = ids ))
                 ?.map { healthcarePartyMapper.map(it)  }
                 ?.asFlow() ?: emptyFlow()
         )
-    }
+    } else emptyFlow()
 
     override fun getHealthcarePartiesByParentId(parentId: String): Flow<HealthcareParty> {
         throw BridgeException()
