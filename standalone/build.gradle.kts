@@ -115,6 +115,7 @@ dependencies {
     implementation(coreLibs.springBootCache)
 
     implementation(kmehrLibs.jaxbApi)
+    implementation(kmehrLibs.jaxbRuntime)
 
     implementation(coreLibs.taktikBoot)
 
