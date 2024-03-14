@@ -37,7 +37,7 @@ import java.text.DecimalFormat
 @Profile("sam")
 @View(name = "all", map = "function(doc) { if (doc.java_type == 'org.taktik.icure.entities.samv2.Paragraph') emit( null, doc._id )}")
 class ParagraphDAOImpl(
-	@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+	@Qualifier("chapIVCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
 	idGenerator: IDGenerator,
 	datastoreInstanceProvider: DatastoreInstanceProvider,
 	designDocumentProvider: DesignDocumentProvider,
@@ -69,9 +69,13 @@ class ParagraphDAOImpl(
 	override fun findParagraphsWithCnk(datastoreInformation: IDatastoreInformation, cnk: Long, language: String): Flow<Paragraph> = flow {
 		val client = couchDbDispatcher.getClient(datastoreInformation)
 
-		val legalReferences = ampDAO.listAmpsByDmppCodes(datastoreInformation, listOf(DecimalFormat("0000000").format(cnk))).flatMapConcat {
-			it.ampps.flatMap { it.dmpps.flatMap { (it.reimbursements ?: emptySet()).mapNotNull { it.legalReferencePath } } }.asFlow()
-		}.mapNotNull { it.split("-").takeIf { it.size == 3 && it[1] == "IV" }?.let { ComplexKey.of("IV", it[2]) } }.distinct().toList()
+		val legalReferences = ampDAO.listAmpsByDmppCodes(datastoreInformation, listOf(DecimalFormat("0000000").format(cnk))).flatMapConcat { amp ->
+			amp.ampps.flatMap { ampp ->
+				ampp.dmpps.flatMap { dmpp -> (dmpp.reimbursements ?: emptySet()).mapNotNull { it.legalReferencePath } }
+			}.asFlow()
+		}.mapNotNull { legalReferencePath ->
+			legalReferencePath.split("-").takeIf { it.size == 3 && it[1] == "IV" }?.let { ComplexKey.of("IV", it[2]) }
+		}.distinct().toList()
 
 		val viewQuery = createQuery("by_chapter_paragraph")
 			.keys(legalReferences)
