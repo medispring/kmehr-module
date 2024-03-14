@@ -37,7 +37,7 @@ import java.text.DecimalFormat
 @Profile("sam")
 @View(name = "all", map = "function(doc) { if (doc.java_type == 'org.taktik.icure.entities.samv2.Paragraph') emit( null, doc._id )}")
 class ParagraphDAOImpl(
-	@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+	@Qualifier("chapIVCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
 	idGenerator: IDGenerator,
 	datastoreInstanceProvider: DatastoreInstanceProvider,
 	designDocumentProvider: DesignDocumentProvider,
