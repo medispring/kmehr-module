@@ -1277,7 +1277,7 @@ class SumehrExport(
             nonConfidentialItems.forEach { m ->
                 val items = trn.headingsAndItemsAndTexts
                 createItemWithContent(
-                    m.copy(closingDate = m.closingDate ?: FuzzyValues.getFuzzyDate(LocalDateTime.now().plusMonths(1), ChronoUnit.SECONDS)),
+                    m.copy(closingDate = getMedicationServiceClosingDate(m)),
                     items.filter{ it !is HeadingType }.size + 1,
                     "medication",
                     m.content.entries.mapNotNull {
