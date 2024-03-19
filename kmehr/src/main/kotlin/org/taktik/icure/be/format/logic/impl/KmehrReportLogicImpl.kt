@@ -173,12 +173,19 @@ class KmehrReportLogicImpl(
                 ) to services
             }
         } ?: listOf()
-        return contactLogic.modifyEntities(listOf(
-            ctc.copy(
-                subContacts = ctc.subContacts + subContactsAndServices.map { it.first },
-                services = ctc.services + subContactsAndServices.flatMap { it.second }
-            )
-        )).firstOrNull()
+        val updatedContact = ctc.copy(
+            subContacts = ctc.subContacts + subContactsAndServices.map { it.first },
+            services = ctc.services + subContactsAndServices.flatMap { it.second }
+        )
+        return if(updatedContact.rev != null) {
+            contactLogic.modifyEntities(listOf(updatedContact)).firstOrNull()
+                ?: throw IllegalArgumentException("Cannot update contact ${ctc.id}, check the revision or your access to it")
+        } else {
+            if (updatedContact.delegations.isEmpty() && updatedContact.securityMetadata?.secureDelegations.isNullOrEmpty()) {
+                throw IllegalArgumentException("Cannot create a Contact with no delegation")
+            }
+            contactLogic.createContact(updatedContact)
+        }
     }
 
     /**

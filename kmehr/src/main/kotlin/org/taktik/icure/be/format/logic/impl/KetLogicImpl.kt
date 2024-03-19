@@ -96,7 +96,7 @@ class KetLogicImpl(
     }
 
     /**
-     * Converts a XML Node to a ResultInfo.
+     * Converts an XML Node to a ResultInfo.
      * @param n the Node.
      * @return a ResultInfo.
      */
