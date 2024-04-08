@@ -259,7 +259,8 @@ class KmehrController(
         @RequestBody info: SumehrExportInfoDto
     ) = flow {
         patientLogic.getPatient(patientId)?.let {
-            healthcarePartyLogic.getHealthcareParty(sessionLogic.getCurrentHealthcarePartyId())?.let { hcp ->
+            val hcpId = sessionLogic.getCurrentHealthcarePartyId()
+            healthcarePartyLogic.getHealthcareParty(hcpId)?.let { hcp ->
                 emitAll(
                     sumehrLogicV2.createSumehr(
                         it,

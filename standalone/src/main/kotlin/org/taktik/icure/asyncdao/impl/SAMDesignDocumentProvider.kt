@@ -11,7 +11,7 @@ import org.taktik.icure.asyncdao.Partitions
 
 @Profile("sam")
 @Service
-class SAMDesignDocumentProvider: DesignDocumentProvider {
+class SAMDesignDocumentProvider : DesignDocumentProvider {
     override fun baseDesignDocumentId(entityClass: Class<*>, secondaryPartition: String?) =
         designDocName(entityClass.simpleName, secondaryPartition)
 
@@ -25,10 +25,13 @@ class SAMDesignDocumentProvider: DesignDocumentProvider {
     override suspend fun generateDesignDocuments(
         entityClass: Class<*>,
         metaDataSource: Any,
-        client: Client?,
-        partition: Partitions
+        client: Client?, partition: Partitions, ignoreIfUnchanged: Boolean
     ): Set<DesignDocument> =
-        StdDesignDocumentFactory().generateFrom(baseDesignDocumentId(entityClass), metaDataSource, useVersioning = false)
+        StdDesignDocumentFactory().generateFrom(
+            baseDesignDocumentId(entityClass),
+            metaDataSource,
+            useVersioning = false
+        )
 
     override suspend fun currentDesignDocumentId(
         entityClass: Class<*>,
