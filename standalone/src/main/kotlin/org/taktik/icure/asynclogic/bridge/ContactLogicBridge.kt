@@ -145,6 +145,16 @@ class ContactLogicBridge(
         throw BridgeException()
     }
 
+    override fun listContactIdsByDataOwnerPatientOpeningDate(
+        dataOwnerId: String,
+        secretForeignKeys: Set<String>,
+        startDate: Long?,
+        endDate: Long?,
+        descending: Boolean
+    ): Flow<String> {
+        throw BridgeException()
+    }
+
     override fun listContactIdsByHcPartyAndIdentifiers(hcPartyId: String, identifiers: List<Identifier>): Flow<String> {
         throw BridgeException()
     }
@@ -170,14 +180,6 @@ class ContactLogicBridge(
                 ?.map(contactMapper::map)
                 ?.asFlow() ?: emptyFlow()
         )
-    }
-
-    override fun listContactByHCPartyIdAndSecretPatientKey(
-        hcPartyId: String,
-        secretPatientKey: String,
-        paginationOffset: PaginationOffset<ComplexKey>
-    ): Flow<PaginationElement> {
-        throw BridgeException()
     }
 
     override fun listContactsByHcPartyAndFormId(hcPartyId: String, formId: String): Flow<Contact> {

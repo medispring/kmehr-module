@@ -6,6 +6,7 @@ import java.util.*
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed (https://youtrack.jetbrains.com/issue/KTIJ-19369)
 plugins {
     id("com.icure.kotlin-application-conventions")
+    kotlin("plugin.serialization")
 
     alias(coreLibs.plugins.springBootPlugin) apply(true)
     alias(coreLibs.plugins.mavenRepository)
@@ -15,7 +16,6 @@ plugins {
     alias(coreLibs.plugins.springBootDependenciesManagement) apply(true)
     alias(coreLibs.plugins.kotlinAllOpen) apply(true)
     alias(coreLibs.plugins.kotlinSpring) apply(true)
-    alias(coreLibs.plugins.kotlinxSerialization) apply(true)
 
     `maven-publish`
 }

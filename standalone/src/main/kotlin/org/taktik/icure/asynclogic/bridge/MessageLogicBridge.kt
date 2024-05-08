@@ -129,11 +129,13 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         throw BridgeException()
     }
 
-    override fun listMessagesByHcPartySecretPatientKey(
-        hcPartyId: String,
-        secretPatientKey: String,
-        paginationOffset: PaginationOffset<ComplexKey>
-    ): Flow<PaginationElement> {
+    override fun listMessageIdsByDataOwnerPatientSentDate(
+        dataOwnerId: String,
+        secretForeignKeys: Set<String>,
+        startDate: Long?,
+        endDate: Long?,
+        descending: Boolean
+    ): Flow<String> {
         throw BridgeException()
     }
 

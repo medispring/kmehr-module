@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.ViewQueryResultEvent
-import org.taktik.couchdb.entity.ComplexKey
 import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.HealthElementLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
@@ -24,7 +23,6 @@ import org.taktik.icure.entities.embed.Identifier
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
 import org.taktik.icure.exceptions.BridgeException
-import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.mapper.HealthElementV2Mapper
 
 @OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
@@ -123,11 +121,13 @@ class HealthElementLogicBridge(
         )
     }
 
-    override fun listHealthElementsByHCPartyIdAndSecretPatientKey(
-        hcPartyId: String,
-        secretPatientKey: String,
-        offset: PaginationOffset<ComplexKey>
-    ): Flow<PaginationElement> {
+    override fun listHealthElementIdsByDataOwnerPatientOpeningDate(
+        dataOwnerId: String,
+        secretForeignKeys: Set<String>,
+        startDate: Long?,
+        endDate: Long?,
+        descending: Boolean
+    ): Flow<String> {
         throw BridgeException()
     }
 

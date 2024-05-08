@@ -46,7 +46,6 @@ import org.taktik.icure.services.external.rest.v2.dto.samv2.ParagraphDto
 import org.taktik.icure.services.external.rest.v2.dto.samv2.PharmaceuticalFormDto
 import org.taktik.icure.services.external.rest.v2.dto.samv2.SubstanceDto
 import org.taktik.icure.services.external.rest.v2.dto.samv2.VerseDto
-import org.taktik.icure.services.external.rest.v2.dto.samv2.VmpDto
 import org.taktik.icure.services.external.rest.v2.dto.samv2.VmpGroupDto
 import org.taktik.icure.services.external.rest.v2.mapper.samv2.AmpV2Mapper
 import org.taktik.icure.services.external.rest.v2.mapper.samv2.NmpV2Mapper
@@ -161,7 +160,7 @@ class SamV2Controller(
         val startKeyElements = if (startKey == null) null else objectMapper.readValue<List<String>>(startKey, objectMapper.typeFactory.constructCollectionType(List::class.java, String::class.java))
         val paginationOffset = PaginationOffset(startKeyElements, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findVmpsByLabel(language, label, paginationOffset).paginatedList<VmpDto>(realLimit, objectMapper)
+        samV2Logic.findVmpsByLabel(language, label, paginationOffset).paginatedList(vmpV2Mapper::map, realLimit, objectMapper)
     }
 
     @Operation(summary = "Finding VMPs by group with pagination.", description = "Returns a list of codes matched with given input. If several types are provided, paginantion is not supported")
@@ -181,7 +180,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findVmpsByGroupCode(vmpgCode, paginationOffset).paginatedList<VmpDto>(realLimit, objectMapper)
+        samV2Logic.findVmpsByGroupCode(vmpgCode, paginationOffset).paginatedList(vmpV2Mapper::map, realLimit, objectMapper)
     }
 
     @Operation(summary = "Finding VMPs by group with pagination.", description = "Returns a list of codes matched with given input. If several types are provided, paginantion is not supported")
@@ -201,7 +200,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findVmpsByVmpCode(vmpCode, paginationOffset).paginatedList<VmpDto>(realLimit, objectMapper)
+        samV2Logic.findVmpsByVmpCode(vmpCode, paginationOffset).paginatedList(vmpV2Mapper::map, realLimit, objectMapper)
     }
 
     @Operation(summary = "Finding NMPs by label with pagination.", description = "Returns a paginated list of NMPs by matching label. Matches occur per word")
@@ -227,7 +226,7 @@ class SamV2Controller(
         val startKeyElements = if (startKey == null) null else objectMapper.readValue<List<String>>(startKey, objectMapper.typeFactory.constructCollectionType(List::class.java, String::class.java))
         val paginationOffset = PaginationOffset(startKeyElements, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findNmpsByLabel(language, label, paginationOffset).paginatedList<NmpDto>(realLimit, objectMapper).let {
+        samV2Logic.findNmpsByLabel(language, label, paginationOffset).paginatedList(nmpV2Mapper::map, realLimit, objectMapper).let {
             it.copy(rows = addProductIdsToNmps(it.rows))
         }
     }
@@ -249,7 +248,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findVmpsByGroupId(vmpgId, paginationOffset).paginatedList<VmpDto>(realLimit, objectMapper)
+        samV2Logic.findVmpsByGroupId(vmpgId, paginationOffset).paginatedList(vmpV2Mapper::map, realLimit, objectMapper)
     }
 
     @Operation(summary = "Finding AMPs by group with pagination.", description = "Returns a list of codes matched with given input. If several types are provided, paginantion is not supported")
@@ -269,7 +268,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findAmpsByVmpGroupCode(vmpgCode, paginationOffset).paginatedList<AmpDto>(realLimit, objectMapper).let {
+        samV2Logic.findAmpsByVmpGroupCode(vmpgCode, paginationOffset).paginatedList(ampV2Mapper::map, realLimit, objectMapper).let {
             it.copy(rows = addProductIdsToAmps(it.rows))
         }
     }
@@ -291,7 +290,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findAmpsByVmpGroupId(vmpgId, paginationOffset).paginatedList<AmpDto>(realLimit, objectMapper).let {
+        samV2Logic.findAmpsByVmpGroupId(vmpgId, paginationOffset).paginatedList(ampV2Mapper::map, realLimit, objectMapper).let {
             it.copy(rows = addProductIdsToAmps(it.rows))
         }
     }
@@ -313,7 +312,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findAmpsByVmpCode(vmpCode, paginationOffset).paginatedList<AmpDto>(realLimit, objectMapper).let {
+        samV2Logic.findAmpsByVmpCode(vmpCode, paginationOffset).paginatedList(ampV2Mapper::map, realLimit, objectMapper).let {
             it.copy(rows = addProductIdsToAmps(it.rows))
         }
     }
@@ -335,7 +334,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findAmpsByAtcCode(atcCode, paginationOffset).paginatedList<AmpDto>(realLimit, objectMapper).let {
+        samV2Logic.findAmpsByAtcCode(atcCode, paginationOffset).paginatedList(ampV2Mapper::map, realLimit, objectMapper).let {
             it.copy(rows = addProductIdsToAmps(it.rows))
         }
     }
@@ -357,7 +356,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findAmpsByVmpId(vmpId, paginationOffset).paginatedList<AmpDto>(realLimit, objectMapper).let {
+        samV2Logic.findAmpsByVmpId(vmpId, paginationOffset).paginatedList(ampV2Mapper::map, realLimit, objectMapper).let {
             it.copy(rows = addProductIdsToAmps(it.rows))
         }
     }
@@ -397,7 +396,7 @@ class SamV2Controller(
         val startKeyElements = if (startKey == null) null else objectMapper.readValue<List<String>>(startKey, objectMapper.typeFactory.constructCollectionType(List::class.java, String::class.java))
         val paginationOffset = PaginationOffset(startKeyElements, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findVmpGroupsByLabel(language, label, paginationOffset).paginatedList<VmpGroupDto>(realLimit, objectMapper).let {
+        samV2Logic.findVmpGroupsByLabel(language, label, paginationOffset).paginatedList(vmpGroupV2Mapper::map, realLimit, objectMapper).let {
             it.copy(rows = addProductIdsToVmpGroups(it.rows))
         }
     }
@@ -419,7 +418,7 @@ class SamV2Controller(
         val realLimit = limit ?: DEFAULT_LIMIT
         val paginationOffset = PaginationOffset(startKey, startDocumentId, null, realLimit + 1)
 
-        samV2Logic.findVmpGroupsByVmpGroupCode(vmpgCode, paginationOffset).paginatedList<VmpGroupDto>(realLimit, objectMapper).let {
+        samV2Logic.findVmpGroupsByVmpGroupCode(vmpgCode, paginationOffset).paginatedList(vmpGroupV2Mapper::map, realLimit, objectMapper).let {
             it.copy(rows = addProductIdsToVmpGroups(it.rows))
         }
     }

@@ -180,7 +180,7 @@ class MedicationSchemeExport(
                 isIsvalidated = true
 
                 // TODO: decide what tho do with the Version On Safe
-                this.version = ((version ?: medicationSchemeSafeVersion ?: 0) + 1).toString()
+                this.version = (version ?: ((medicationSchemeSafeVersion ?: 0) + 1)).toString()
             },
         )
 

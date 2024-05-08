@@ -8,19 +8,16 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.stereotype.Service
-import org.taktik.couchdb.entity.ComplexKey
 import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.DocumentLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.asynclogic.objectstorage.DataAttachmentChange
 import org.taktik.icure.config.BridgeConfig
-import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.domain.BatchUpdateDocumentInfo
 import org.taktik.icure.entities.Document
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
 import org.taktik.icure.exceptions.BridgeException
-import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.mapper.DocumentV2Mapper
 import org.taktik.icure.utils.asDataBuffer
 import java.nio.ByteBuffer
@@ -97,11 +94,13 @@ class DocumentLogicBridge(
         throw BridgeException()
     }
 
-    override fun listDocumentsByHcPartyIdAndSecretMessageKey(
-        hcPartyId: String,
-        secretForeignKey: String,
-        paginationOffset: PaginationOffset<ComplexKey>
-    ): Flow<PaginationElement> {
+    override fun listDocumentIdsByDataOwnerPatientCreated(
+        dataOwnerId: String,
+        secretForeignKeys: Set<String>,
+        startDate: Long?,
+        endDate: Long?,
+        descending: Boolean
+    ): Flow<String> {
         throw BridgeException()
     }
 
