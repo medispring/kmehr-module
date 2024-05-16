@@ -96,7 +96,7 @@ spec:
                     readinessProbe:
                         httpGet:
                             path: /actuator/health
-                            port: 16043
+                            port: 8080
                         initialDelaySeconds: 20
                         periodSeconds: 10
                         timeoutSeconds: 5
@@ -107,7 +107,7 @@ spec:
                     livenessProbe:
                         httpGet:
                             path: /actuator/health
-                            port: 16043
+                            port: 8080
                         initialDelaySeconds: 300
                         periodSeconds: 30
                         timeoutSeconds: 8
