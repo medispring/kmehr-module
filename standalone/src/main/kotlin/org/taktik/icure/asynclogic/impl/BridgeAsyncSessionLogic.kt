@@ -23,6 +23,7 @@ import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.constants.Roles
 import org.taktik.icure.entities.DataOwnerType
 import org.taktik.icure.entities.base.Encryptable
+import org.taktik.icure.entities.base.HasEncryptionMetadata
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.exceptions.ForbiddenRequestException
 import org.taktik.icure.security.BridgeCredentialsManager
@@ -62,10 +63,11 @@ class BridgeAsyncSessionLogic(
     override suspend fun login(
         username: String,
         password: String,
-        request: ServerHttpRequest,
         session: WebSession?,
         groupId: String?
-    ): Authentication? { throw BridgeException() }
+    ): Authentication? {
+        throw BridgeException()
+    }
 
     override suspend fun logout() {
         throw BridgeException()
@@ -80,10 +82,10 @@ class BridgeAsyncSessionLogic(
         }.bodyAsText()
         return httpClient.post("${bridgeConfig.iCureUrl}/rest/v2/auth/login") {
             contentType(ContentType.Application.Json)
-            setBody(objectMapper.writeValueAsString(LoginCredentials().apply {
-                username = "${claims.groupId}/${claims.userId}"
+            setBody(objectMapper.writeValueAsString(LoginCredentials(
+                username = "${claims.groupId}/${claims.userId}",
                 password = tmpToken
-            }))
+            )))
         }.let { objectMapper.readValue<JwtResponse>(it.bodyAsText()) }.token
     }
 
@@ -115,7 +117,7 @@ class BridgeAsyncSessionLogic(
         getCurrentSessionContext().getHealthcarePartyId()
             ?: throw ForbiddenRequestException("Current user is not an Healthcare Party")
 
-    override suspend fun getSearchKeyMatcher(): (String, Encryptable) -> Boolean {
+    override suspend fun getSearchKeyMatcher(): (String, HasEncryptionMetadata) -> Boolean {
         throw BridgeException()
     }
 

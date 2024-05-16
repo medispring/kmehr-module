@@ -65,10 +65,11 @@ class WebsocketAuthTest(
         "If the JWT sent to the WS operation expires, is automatically refreshed mid-request" {
             val shortLivedToken = client.post("${bridgeConfig.iCureUrl}/rest/v2/auth/login?duration=5") {
                 contentType(ContentType.Application.Json)
-                setBody(objectMapper.writeValueAsString(LoginCredentials().apply {
-                    username = "${KmehrTestApplication.groupId}/${KmehrTestApplication.masterHcp.userId}"
-                    password = KmehrTestApplication.masterHcp.password
-                }))
+                setBody(objectMapper.writeValueAsString(LoginCredentials(
+                        username = "${KmehrTestApplication.groupId}/${KmehrTestApplication.masterHcp.userId}",
+                        password = KmehrTestApplication.masterHcp.password
+                    )
+                ))
             }.let { objectMapper.readValue<JwtResponse>(it.bodyAsText()) }.token
             client.webSocket(host = "127.0.0.1", port = port, path = "/ws/fake/slowOp?jwt=$shortLivedToken") {
                 send(Frame.Text(uuid()))

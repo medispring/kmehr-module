@@ -32,6 +32,7 @@ import org.taktik.icure.entities.base.CodeStub
 import org.taktik.icure.entities.embed.AddressType
 import org.taktik.icure.entities.embed.Content
 import org.taktik.icure.entities.embed.Measure
+import org.taktik.icure.entities.embed.ReferenceRange
 import org.taktik.icure.utils.FuzzyValues
 import java.io.*
 import java.nio.charset.UnsupportedCharsetException
@@ -113,8 +114,7 @@ class HealthOneLogicImpl(
                 }
             } else if (ll != null && isProtocolLine(line!!)) {
                 val pl = getProtocolLine(line!!)
-                if (pl != null) { // Less than 20 lines ... If the codes are different,
-// We probably have a bad header... Just concatenate
+                if (pl != null) { // Less than 20 lines ... If the codes are different, we probably have a bad header... Just concatenate
                     if (ll.protoList.size > 20 && pl.code != ll.protoList[ll.protoList.size - 1]!!.code) {
                         createServices(ll, language, position)
                     }
@@ -131,10 +131,12 @@ class HealthOneLogicImpl(
     }
 
     /**
-     * Parses a LaboLine creating a Service for each result and protocol.
-     * @param ll the LaboLine.
+     * Creates a new iCure service for each lab result and protocol already registered in the LaboLine.
+     * After that, it will remove all the results in [LaboLine.labosList] and [LaboLine.protoList]
+     *
+     * @param ll the [LaboLine]. It will be modified by this function.
      * @param language the language of the Content in the Services.
-     * @param position the index of the Services.
+     * @param position the index of line in the document to parse, it will become the index of the service.
      */
     private fun createServices(ll: LaboLine, language: String, position: Long) {
         if (ll.labosList.size > 0 && ll.ril != null) {
@@ -267,13 +269,13 @@ class HealthOneLogicImpl(
     }
 
     /**
-     * Creates a new iCureService related to a result with a numeric Content (the result). If it is possible, also parses
-     * the reference values for the result from the LaboResultLine reference values.
+     * Creates a new iCure Service from a [LaboResultLine] with a numeric value.
+     *
      * @param language the language of the Content.
      * @param d the numeric value.
-     * @param lrl the LaboResultLine.
+     * @param lrl the [LaboResultLine].
      * @param position the index of the Service.
-     * @param ril the ResultsInfosLine.
+     * @param ril the [ResultsInfosLine].
      * @param comment a comment to add to the Content.
      * @return an iCure Service.
      */
@@ -289,8 +291,12 @@ class HealthOneLogicImpl(
                         value = d,
                         comment = comment,
                         unit = lrl.unit?.let { it.ifBlank { r?.unit } } ?: r?.unit,
-                        min = r?.minValue,
-                        max = r?.maxValue,
+                        referenceRanges = listOf(
+                            ReferenceRange(
+                                low = r?.minValue,
+                                high = r?.maxValue
+                            )
+                        ).takeIf { r?.minValue != null || r?.maxValue != null } ?: emptyList(),
                         severity = severity?.takeIf { it.isNotBlank() }?.let {
                             when (it) {
                                 "+++" -> 3
@@ -606,10 +612,11 @@ class HealthOneLogicImpl(
     }
 
     /**
-     * Creates a LaboResultLine from a String.
-     * @param line the String.
-     * @param ll a LaboLine
-     * @return a LaboResultLine.
+     * Creates a [LaboResultLine] from a raw line of the document.
+     *
+     * @param line the raw line.
+     * @param ll the [LaboLine] parsed up to now.
+     * @return a [LaboResultLine] or null if the line is not in the correct format.
      */
     private fun getLaboResultLine(line: String, ll: LaboLine): LaboResultLine? =
         try {

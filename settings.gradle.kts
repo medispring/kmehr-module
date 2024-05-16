@@ -4,6 +4,7 @@ pluginManagement {
 
     repositories {
         mavenLocal()
+        google()
         gradlePluginPortal()
         mavenCentral()
         maven { url = uri("https://maven.taktik.be/content/groups/public") }
@@ -20,6 +21,7 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
+        google()
         mavenLocal()
         mavenCentral()
         maven { url = uri("https://maven.taktik.be/content/groups/public") }

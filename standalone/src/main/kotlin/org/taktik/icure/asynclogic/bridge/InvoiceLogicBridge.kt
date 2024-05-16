@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
-import org.taktik.couchdb.ViewQueryResultEvent
 import org.taktik.couchdb.entity.ComplexKey
 import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.InvoiceLogic
@@ -140,11 +139,13 @@ class InvoiceLogicBridge(
         throw BridgeException()
     }
 
-    override fun listInvoicesByHcPartyAndPatientSfk(
-        hcParty: String,
-        secretPatientKey: String,
-        offset: PaginationOffset<ComplexKey>
-    ): Flow<PaginationElement> {
+    override fun listInvoiceIdsByDataOwnerPatientInvoiceDate(
+        dataOwnerId: String,
+        secretForeignKeys: Set<String>,
+        startDate: Long?,
+        endDate: Long?,
+        descending: Boolean
+    ): Flow<String> {
         throw BridgeException()
     }
 

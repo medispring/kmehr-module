@@ -20,6 +20,7 @@ import org.taktik.icure.entities.User
 import org.taktik.icure.entities.base.PropertyStub
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
+import org.taktik.icure.services.external.rest.v2.dto.UserDto
 import org.taktik.icure.services.external.rest.v2.mapper.UnsecureUserV2Mapper
 
 @OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
@@ -29,6 +30,12 @@ class UserLogicBridge(
     private val bridgeConfig: BridgeConfig,
     private val userMapper: UnsecureUserV2Mapper
 ) : GenericLogicBridge<User>(), UserLogic {
+
+    private val userDtoToUser: (UserDto) -> User = {
+        userMapper.map(it.copy(
+            authenticationTokens = it.authenticationTokens.mapValues { (_, token) -> token.copy(token = "*") }
+        ))
+    }
 
     private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let { token ->
         UserApi(basePath = bridgeConfig.iCureUrl, authProvider = ExternalJWTProvider(token))
@@ -44,19 +51,20 @@ class UserLogicBridge(
         throw BridgeException()
     }
 
-    override suspend fun createUser(user: User): User? =
-        getApi()?.createUser(userMapper.map(user))?.let(userMapper::map)
+    override suspend fun createUser(user: User): User? {
+        throw UnsupportedOperationException("The Kmehr module cannot create users")
+    }
 
     override suspend fun deleteUser(userId: String): DocIdentifier? {
-        throw BridgeException()
+        throw UnsupportedOperationException("The Kmehr module cannot delete users")
     }
 
     override suspend fun disableUser(userId: String): User? {
-        throw BridgeException()
+        throw UnsupportedOperationException("The Kmehr module cannot disable users")
     }
 
     override suspend fun enableUser(userId: String): User? {
-        throw BridgeException()
+        throw UnsupportedOperationException("The Kmehr module cannot enable users")
     }
 
     override fun filterUsers(
@@ -78,7 +86,7 @@ class UserLogicBridge(
     }
 
     override suspend fun getUser(id: String): User? =
-        getApi()?.getUser(id)?.let { userMapper.map(it) }
+        getApi()?.getUser(id)?.let(userDtoToUser)
 
     override suspend fun getUserByEmail(email: String): User? {
         throw BridgeException()
@@ -120,14 +128,14 @@ class UserLogicBridge(
     }
 
     override suspend fun modifyUser(modifiedUser: User): User? {
-        throw BridgeException()
+        throw UnsupportedOperationException("The Kmehr module cannot modify users")
     }
 
     override suspend fun setProperties(userId: String, properties: List<PropertyStub>): User? {
-        throw BridgeException()
+        throw UnsupportedOperationException("The Kmehr module cannot modify users")
     }
 
     override suspend fun undeleteUser(userId: String) {
-        throw BridgeException()
+        throw UnsupportedOperationException("The Kmehr module cannot undelete users")
     }
 }
