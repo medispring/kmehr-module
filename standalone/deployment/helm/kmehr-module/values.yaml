@@ -20,7 +20,7 @@ images:
         memoryLimit: "4096M"
         cpuRequest: 100m
         cpuLimit: 2
-        servicePort: 16043
+        servicePort: 8080
         debug: true
         virtualHosts: []
         readiness: true
@@ -39,7 +39,7 @@ images:
         memoryLimit: "4096M"
         cpuRequest: 100m
         cpuLimit: 2
-        servicePort: 16043
+        servicePort: 8080
         debug: true
         virtualHosts: [ ]
         readiness: true
