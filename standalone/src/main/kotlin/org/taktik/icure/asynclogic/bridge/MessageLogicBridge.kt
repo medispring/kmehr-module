@@ -55,6 +55,10 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         throw BridgeException()
     }
 
+    override fun getMessages(messageIds: List<String>): Flow<Message> {
+        throw BridgeException()
+    }
+
     override fun getMessageChildren(messageId: String): Flow<Message> {
         throw BridgeException()
     }
