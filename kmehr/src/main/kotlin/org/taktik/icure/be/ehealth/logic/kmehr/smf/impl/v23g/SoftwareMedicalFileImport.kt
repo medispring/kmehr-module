@@ -1221,7 +1221,7 @@ class SoftwareMedicalFileImport(
                                     Substanceproduct(
                                         intendedcds = it.intendedcd?.let { cd -> listOf(CodeStub.from(cd.s.value(), cd.value, cd.sv)) }
                                             ?: listOf(),
-                                        intendedname = it.intendedname.toString(),
+                                        intendedname = it.intendedname?.toString() ?: "",
                                     )
                                 }
                             },
@@ -1230,7 +1230,7 @@ class SoftwareMedicalFileImport(
                                     Medicinalproduct(
                                         intendedcds = it.intendedcds?.map { cd -> CodeStub.from(cd.s.value(), cd.value, cd.sv) }
                                             ?: listOf(),
-                                        intendedname = it.intendedname.toString(),
+                                        intendedname = it.intendedname?.toString() ?: "",
                                     )
                                 }
                             },
