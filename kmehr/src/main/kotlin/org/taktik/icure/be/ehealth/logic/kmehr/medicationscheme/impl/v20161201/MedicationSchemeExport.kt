@@ -71,6 +71,7 @@ class MedicationSchemeExport(
             soft = Config.Software(name = "iCure", version = kmehrConfig.kmehrVersion),
             clinicalSummaryType = "",
             defaultLanguage = "en",
+            format = Config.Format.MEDICATIONSCHEME,
         )
     ) = flow {
         config.defaultLanguage = when (sender.languages.firstOrNull()) {
