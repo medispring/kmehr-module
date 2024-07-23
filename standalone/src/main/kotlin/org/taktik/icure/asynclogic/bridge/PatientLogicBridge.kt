@@ -27,6 +27,7 @@ import org.taktik.icure.entities.embed.Gender
 import org.taktik.icure.entities.embed.Identifier
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
@@ -362,6 +363,15 @@ class PatientLogicBridge(
     }
 
     override suspend fun mergePatients(fromId: String, expectedFromRev: String, updatedInto: Patient): Patient {
+        throw BridgeException()
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
         throw BridgeException()
     }
 

@@ -6,6 +6,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.ViewQueryResultEvent
+import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.CodeLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
@@ -13,6 +14,7 @@ import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.base.Code
 import org.taktik.icure.entities.base.CodeStub
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.errors.UnauthorizedException
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
@@ -134,6 +136,16 @@ class CodeLogicBridge(
         getApi()?.getCodeByRegionLanguagesTypeLabel(region, label, type, languages)?.let {
             codeMapper.map(it)
         }
+
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
+        throw BridgeException()
+    }
 
     override fun listCodeIdsByQualifiedLinkId(linkType: String, linkedId: String?): Flow<String> {
         throw BridgeException()

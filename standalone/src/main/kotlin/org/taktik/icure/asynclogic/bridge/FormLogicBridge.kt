@@ -14,6 +14,7 @@ import org.taktik.icure.entities.Form
 import org.taktik.icure.entities.embed.Delegation
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.services.external.rest.v2.mapper.FormV2Mapper
 
@@ -48,15 +49,20 @@ class FormLogicBridge(
         throw BridgeException()
     }
 
-    override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
-        throw BridgeException()
-    }
-
     override fun bulkShareOrUpdateMetadata(requests: BulkShareOrUpdateMetadataParams): Flow<EntityBulkShareResult<Form>> {
         throw BridgeException()
     }
 
     override suspend fun getAllByUniqueId(lid: String): List<Form> {
+        throw BridgeException()
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
         throw BridgeException()
     }
 

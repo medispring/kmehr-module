@@ -14,6 +14,8 @@ import org.taktik.icure.asynclogic.FormTemplateLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.FormTemplate
+import org.taktik.icure.entities.utils.ExternalFilterKey
+import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.services.external.rest.v2.mapper.FormTemplateV2Mapper
 
 @OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
@@ -67,5 +69,14 @@ class FormTemplateLogicBridge(
 
     override suspend fun modifyFormTemplate(formTemplate: FormTemplate): FormTemplate? {
         throw IllegalStateException("Bridge method not implemented")
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
+        throw BridgeException()
     }
 }

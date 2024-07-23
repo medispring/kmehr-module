@@ -26,6 +26,7 @@ import org.taktik.icure.entities.embed.Delegation
 import org.taktik.icure.entities.embed.Identifier
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
@@ -75,10 +76,6 @@ class ContactLogicBridge(
         paginationOffset: PaginationOffset<Nothing>,
         filter: FilterChain<org.taktik.icure.entities.embed.Service>
     ): Flow<org.taktik.icure.entities.embed.Service> {
-        throw BridgeException()
-    }
-
-    override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
         throw BridgeException()
     }
 
@@ -312,6 +309,15 @@ class ContactLogicBridge(
                 entities.map(contactMapper::map).toList()
             )?.map(contactMapper::map)?.asFlow() ?: emptyFlow()
         )
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
+        TODO("Not yet implemented")
     }
 
     override fun modifyEntities(entities: Collection<Contact>): Flow<Contact> = modifyEntities(entities.asFlow())

@@ -14,6 +14,8 @@ import org.taktik.icure.asynclogic.EntityReferenceLogic
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.EntityReference
+import org.taktik.icure.entities.utils.ExternalFilterKey
+import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.services.external.rest.v2.mapper.EntityReferenceV2Mapper
 
 @OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
@@ -40,6 +42,15 @@ class EntityReferenceLogicBridge(
                     .asFlow()
             } ?: emptyFlow()
         )
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
+        throw BridgeException()
     }
 
 }

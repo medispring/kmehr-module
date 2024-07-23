@@ -17,6 +17,7 @@ import org.taktik.icure.domain.BatchUpdateDocumentInfo
 import org.taktik.icure.entities.Document
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.services.external.rest.v2.mapper.DocumentV2Mapper
 import org.taktik.icure.utils.asDataBuffer
@@ -59,11 +60,16 @@ class DocumentLogicBridge(
         throw BridgeException()
     }
 
-    override fun solveConflicts(limit: Int?, ids: List<String>?): Flow<IdAndRev> {
+    override suspend fun getDocumentsByExternalUuid(documentId: String): List<Document> {
         throw BridgeException()
     }
 
-    override suspend fun getDocumentsByExternalUuid(documentId: String): List<Document> {
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
         throw BridgeException()
     }
 
