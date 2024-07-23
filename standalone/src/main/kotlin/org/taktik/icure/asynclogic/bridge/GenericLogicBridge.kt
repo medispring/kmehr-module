@@ -5,8 +5,13 @@ import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.couchdb.id.Identifiable
 import org.taktik.icure.domain.filter.chain.FilterChain
+import org.taktik.icure.exceptions.BridgeException
 
 open class GenericLogicBridge<E : Identifiable<String>> {
+
+    fun solveConflicts(limit: Int?, ids: List<String>?): Flow<IdAndRev> {
+        throw BridgeException()
+    }
 
     fun solveConflicts(groupId: String, limit: Int?): Flow<IdAndRev> {
         throw IllegalStateException("Bridge method not implemented")

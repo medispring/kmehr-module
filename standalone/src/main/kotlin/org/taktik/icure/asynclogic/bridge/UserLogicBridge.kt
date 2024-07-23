@@ -18,6 +18,7 @@ import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.User
 import org.taktik.icure.entities.base.PropertyStub
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.UserDto
@@ -137,5 +138,14 @@ class UserLogicBridge(
 
     override suspend fun undeleteUser(userId: String) {
         throw UnsupportedOperationException("The Kmehr module cannot undelete users")
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
+        throw BridgeException()
     }
 }

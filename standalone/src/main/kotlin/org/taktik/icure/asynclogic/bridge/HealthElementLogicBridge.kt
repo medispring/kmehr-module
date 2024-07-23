@@ -22,6 +22,7 @@ import org.taktik.icure.entities.embed.Delegation
 import org.taktik.icure.entities.embed.Identifier
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.services.external.rest.v2.mapper.HealthElementV2Mapper
 
@@ -42,6 +43,15 @@ class HealthElementLogicBridge(
             ?.createHealthElements(entities.map(healthElementMapper::map))
             ?.map(healthElementMapper::map)
             ?.onEach { emit(it) }
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
+        throw BridgeException()
     }
 
     override fun deleteHealthElements(ids: Set<String>): Flow<DocIdentifier> {

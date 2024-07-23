@@ -23,6 +23,7 @@ import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.HealthcareParty
 import org.taktik.icure.entities.embed.Identifier
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.HealthcarePartyDto
@@ -222,6 +223,15 @@ class HealthcarePartyLogicBridge(
     }
 
     override fun listHealthcarePartyIdsByName(name: String, desc: Boolean): Flow<String> {
+        throw BridgeException()
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
         throw BridgeException()
     }
 

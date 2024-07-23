@@ -12,6 +12,7 @@ import org.taktik.icure.entities.Message
 import org.taktik.icure.entities.embed.Delegation
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
 
@@ -30,6 +31,15 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         paginationOffset: PaginationOffset<Nothing>,
         filter: FilterChain<Message>
     ): Flow<ViewQueryResultEvent> {
+        throw BridgeException()
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
         throw BridgeException()
     }
 

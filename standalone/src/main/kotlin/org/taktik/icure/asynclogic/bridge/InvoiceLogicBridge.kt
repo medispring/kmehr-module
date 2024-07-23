@@ -24,6 +24,7 @@ import org.taktik.icure.entities.embed.InvoicingCode
 import org.taktik.icure.entities.embed.MediumType
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
 import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
@@ -108,6 +109,15 @@ class InvoiceLogicBridge(
     }
 
     override fun getUnsentInvoicesForUsersAndInsuranceIds(userIds: List<String>?): Flow<Invoice> {
+        throw BridgeException()
+    }
+
+    override fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey<*>?,
+        endKey: ExternalFilterKey<*>?
+    ): Flow<String> {
         throw BridgeException()
     }
 
