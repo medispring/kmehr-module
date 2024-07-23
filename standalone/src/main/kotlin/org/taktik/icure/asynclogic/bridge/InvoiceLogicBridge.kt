@@ -199,10 +199,6 @@ class InvoiceLogicBridge(
         throw BridgeException()
     }
 
-    override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
-        throw BridgeException()
-    }
-
     override fun listInvoicesIdsByTarificationsByCode(
         hcPartyId: String,
         codeCode: String,

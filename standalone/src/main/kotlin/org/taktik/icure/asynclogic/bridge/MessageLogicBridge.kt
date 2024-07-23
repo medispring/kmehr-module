@@ -132,10 +132,6 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         throw BridgeException()
     }
 
-    override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
-        throw BridgeException()
-    }
-
     override fun listMessagesByHCPartySecretPatientKeys(
         hcPartyId: String,
         secretPatientKeys: List<String>

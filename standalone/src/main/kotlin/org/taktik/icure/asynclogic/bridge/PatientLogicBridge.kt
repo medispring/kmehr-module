@@ -163,10 +163,6 @@ class PatientLogicBridge(
         throw BridgeException()
     }
 
-    override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
-        throw BridgeException()
-    }
-
     @Deprecated("A DataOwner may now have multiple AES Keys. Use getAesExchangeKeysForDelegate instead")
     override suspend fun getHcPartyKeysForDelegate(healthcarePartyId: String): Map<String, String> {
         throw BridgeException()
