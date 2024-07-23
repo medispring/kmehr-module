@@ -81,10 +81,6 @@ class HealthElementLogicBridge(
         throw BridgeException()
     }
 
-    override fun solveConflicts(limit: Int?): Flow<IdAndRev> {
-        throw BridgeException()
-    }
-
     override fun bulkShareOrUpdateMetadata(requests: BulkShareOrUpdateMetadataParams): Flow<EntityBulkShareResult<HealthElement>> {
         throw BridgeException()
     }
