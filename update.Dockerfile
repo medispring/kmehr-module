@@ -2,6 +2,7 @@ FROM alpine:latest
 ARG version
 ARG gitUser
 ARG gitPwd
+ENV GH_TOKEN=$gitPwd
 
 RUN apk add --no-cache \
     curl \
@@ -19,7 +20,21 @@ RUN curl -fsSL https://github.com/cli/cli/releases/download/v2.53.0/gh_2.53.0_li
     rm -rf gh_2.53.0_linux_amd64
 
 RUN gh --version
-RUN echo $gitPwd | gh auth login --with-token
+
+# Configure Git to use a credential helper
+RUN git config --global credential.helper cache
+
+# Set environment variable for the token
+ENV GIT_ASKPASS=/etc/git-askpass.sh
+
+# Create a script that supplies the token
+RUN echo '#!/bin/sh' > /etc/git-askpass.sh && \
+    echo 'case "$1" in' >> /etc/git-askpass.sh && \
+    echo 'Username*) echo $gitUser ;;' >> /etc/git-askpass.sh && \
+    echo 'Password*) echo $gitPwd ;;' >> /etc/git-askpass.sh && \
+    echo 'esac' >> /etc/git-askpass.sh && \
+    chmod +x /etc/git-askpass.sh
+
 RUN git clone https://github.com/icure/kraken-lite.git --depth=1 --recurse-submodules && \
     cd kraken-lite && \
     git config --global user.email "dev@icure.com" && \
@@ -30,6 +45,5 @@ RUN git clone https://github.com/icure/kraken-lite.git --depth=1 --recurse-submo
     sed -i 's/kmehr\s*=\s*".*"/kmehr = "'"$version"'"/' libs.versions.toml && \
     git add . && \
     git commit -m "Bumped kraken-common and kmehr module" && \
-    git remote set-url origin https://${gitUser}:${gitPwd}@github.com/icure/kraken-lite.git && \
     git push --set-upstream origin $branch_name && \
     gh pr create --title "Bumped kmehr module to $version and kraken-common" --body "Bumped kmehr module to $version and kraken-common" --base main --head $branch_name
