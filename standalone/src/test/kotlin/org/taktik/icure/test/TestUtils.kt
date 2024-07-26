@@ -8,13 +8,14 @@ import io.icure.kraken.client.apis.UserApi
 import io.icure.kraken.client.crypto.toPrivateKey
 import io.icure.kraken.client.crypto.toPublicKey
 import io.icure.kraken.client.models.LoginCredentials
-import io.icure.kraken.client.security.BasicAuthProvider
 import io.icure.kraken.client.security.JWTProvider
 import io.kotest.matchers.nulls.shouldNotBeNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.reactor.asCoroutineContext
 import kotlinx.coroutines.withContext
+import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
@@ -214,4 +215,12 @@ suspend fun <T> withAuthenticatedReactorContext(credentials: UserCredentials, bl
 
     val ctx = ReactiveSecurityContextHolder.withSecurityContext(Mono.just(fakeSecurityContext))
     return withContext(coroutineContext.plus(ctx?.asCoroutineContext() as CoroutineContext), block)
+}
+
+fun List<DataBuffer>.combineToString(): String {
+    val dataBufferFactory = DefaultDataBufferFactory()
+    val combinedBuffer = dataBufferFactory.join(this)
+    val byteArray = ByteArray(combinedBuffer.readableByteCount())
+    combinedBuffer.read(byteArray)
+    return String(byteArray, Charsets.UTF_8)
 }

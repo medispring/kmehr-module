@@ -4,6 +4,7 @@
 
 package org.taktik.icure.be.ehealth.logic.kmehr.diarynote.impl.v20170901
 
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.logging.LogFactory
@@ -91,9 +92,7 @@ class DiaryNoteExport(
         folder.patient = makePerson(pat, config)
         fillPatientFolder(folder, pat, sfks, sender, config, note, tags, contexts, isPsy, documentId, attachmentId)
         message.folders.add(folder)
-
-        fillPatientFolder(folder, pat, sfks, sender, config, note, tags, contexts, isPsy, documentId, attachmentId)
-        emitMessage(message.apply { folders.add(folder) }).collect { emit(it) }
+        emitAll(emitMessage(message))
     }
 
     /**

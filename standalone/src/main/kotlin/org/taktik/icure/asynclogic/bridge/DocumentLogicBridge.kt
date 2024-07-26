@@ -64,15 +64,6 @@ class DocumentLogicBridge(
         throw BridgeException()
     }
 
-    override fun listEntityIdsInCustomView(
-        viewName: String,
-        partitionName: String,
-        startKey: ExternalFilterKey<*>?,
-        endKey: ExternalFilterKey<*>?
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
     override suspend fun getMainAttachment(documentId: String): Flow<DataBuffer> =
         getApi()?.let { api ->
             val document = getDocument(documentId)

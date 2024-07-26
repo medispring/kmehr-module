@@ -45,15 +45,6 @@ class HealthElementLogicBridge(
             ?.onEach { emit(it) }
     }
 
-    override fun listEntityIdsInCustomView(
-        viewName: String,
-        partitionName: String,
-        startKey: ExternalFilterKey<*>?,
-        endKey: ExternalFilterKey<*>?
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
     override fun deleteHealthElements(ids: Set<String>): Flow<DocIdentifier> {
         throw BridgeException()
     }
