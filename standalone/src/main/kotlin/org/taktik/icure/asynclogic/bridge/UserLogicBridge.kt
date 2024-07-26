@@ -139,13 +139,4 @@ class UserLogicBridge(
     override suspend fun undeleteUser(userId: String) {
         throw UnsupportedOperationException("The Kmehr module cannot undelete users")
     }
-
-    override fun listEntityIdsInCustomView(
-        viewName: String,
-        partitionName: String,
-        startKey: ExternalFilterKey<*>?,
-        endKey: ExternalFilterKey<*>?
-    ): Flow<String> {
-        throw BridgeException()
-    }
 }

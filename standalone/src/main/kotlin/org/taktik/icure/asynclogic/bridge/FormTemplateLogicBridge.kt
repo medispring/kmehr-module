@@ -70,13 +70,4 @@ class FormTemplateLogicBridge(
     override suspend fun modifyFormTemplate(formTemplate: FormTemplate): FormTemplate? {
         throw IllegalStateException("Bridge method not implemented")
     }
-
-    override fun listEntityIdsInCustomView(
-        viewName: String,
-        partitionName: String,
-        startKey: ExternalFilterKey<*>?,
-        endKey: ExternalFilterKey<*>?
-    ): Flow<String> {
-        throw BridgeException()
-    }
 }

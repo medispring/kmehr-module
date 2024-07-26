@@ -137,16 +137,6 @@ class CodeLogicBridge(
             codeMapper.map(it)
         }
 
-
-    override fun listEntityIdsInCustomView(
-        viewName: String,
-        partitionName: String,
-        startKey: ExternalFilterKey<*>?,
-        endKey: ExternalFilterKey<*>?
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
     override fun listCodeIdsByQualifiedLinkId(linkType: String, linkedId: String?): Flow<String> {
         throw BridgeException()
     }

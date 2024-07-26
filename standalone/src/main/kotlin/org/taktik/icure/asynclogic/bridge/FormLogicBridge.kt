@@ -57,15 +57,6 @@ class FormLogicBridge(
         throw BridgeException()
     }
 
-    override fun listEntityIdsInCustomView(
-        viewName: String,
-        partitionName: String,
-        startKey: ExternalFilterKey<*>?,
-        endKey: ExternalFilterKey<*>?
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
     override suspend fun getForm(id: String): Form? {
         throw BridgeException()
     }

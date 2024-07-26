@@ -40,15 +40,6 @@ class InsuranceLogicBridge(
         throw BridgeException()
     }
 
-    override fun listEntityIdsInCustomView(
-        viewName: String,
-        partitionName: String,
-        startKey: ExternalFilterKey<*>?,
-        endKey: ExternalFilterKey<*>?
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
     override suspend fun getInsurance(insuranceId: String): Insurance? =
         getApi()?.getInsurance(insuranceId)?.let {
             insuranceMapper.map(it)

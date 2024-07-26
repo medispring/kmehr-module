@@ -5,8 +5,10 @@ import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.couchdb.id.Identifiable
 import org.taktik.icure.domain.filter.chain.FilterChain
+import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 
+@Suppress("UNUSED_PARAMETER", "RedundantSuspendModifier")
 open class GenericLogicBridge<E : Identifiable<String>> {
 
     fun solveConflicts(limit: Int?, ids: List<String>?): Flow<IdAndRev> {
@@ -75,5 +77,14 @@ open class GenericLogicBridge<E : Identifiable<String>> {
 
     fun undeleteByIds(identifiers: Collection<String>): Flow<DocIdentifier> {
         throw IllegalStateException("Bridge method not implemented")
+    }
+
+    fun listEntityIdsInCustomView(
+        viewName: String,
+        partitionName: String,
+        startKey: ExternalFilterKey?,
+        endKey: ExternalFilterKey?
+    ): Flow<String> {
+        throw BridgeException()
     }
 }
