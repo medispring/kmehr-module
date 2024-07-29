@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.ViewQueryResultEvent
 import org.taktik.couchdb.entity.ComplexKey
-import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.MessageLogic
 import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.domain.filter.chain.FilterChain
@@ -12,7 +11,6 @@ import org.taktik.icure.entities.Message
 import org.taktik.icure.entities.embed.Delegation
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
-import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
 
@@ -144,16 +142,16 @@ class MessageLogicBridge : GenericLogicBridge<Message>(), MessageLogic {
         throw BridgeException()
     }
 
-    override fun setReadStatus(
-        messages: Collection<Message>,
-        userId: String,
-        status: Boolean,
-        time: Long,
-    ): Flow<Message> {
+    override fun setStatus(messages: Collection<Message>, status: Int): Flow<Message> {
         throw BridgeException()
     }
 
-    override fun setStatus(messages: Collection<Message>, status: Int): Flow<Message> {
+    override fun setReadStatus(
+        messages: Collection<Message>,
+        userId: String?,
+        status: Boolean,
+        time: Long?
+    ): Flow<Message> {
         throw BridgeException()
     }
 }
