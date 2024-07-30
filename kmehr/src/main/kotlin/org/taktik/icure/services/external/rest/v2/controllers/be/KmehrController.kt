@@ -101,10 +101,10 @@ class KmehrController(
     fun generateDiaryNote(
         @PathVariable patientId: String,
         @RequestBody info: DiaryNoteExportInfoDto,
-    ) = mono {
+    ) = flow {
         patientLogic.getPatient(patientId)?.let {
             healthcarePartyLogic.getHealthcareParty(sessionLogic.getCurrentHealthcarePartyId())?.let { it1 ->
-                diaryNoteLogic.createDiaryNote(
+                emitAll(diaryNoteLogic.createDiaryNote(
                     it,
                     info.secretForeignKeys,
                     it1,
@@ -115,10 +115,10 @@ class KmehrController(
                     info.psy ?: false,
                     info.documentId,
                     info.attachmentId
-                )
+                ))
             }
         } ?: throw IllegalArgumentException("Missing argument")
-    }
+    }.injectReactorContext()
 
     @Operation(summary = "Generate sumehr", responses = [ApiResponse(responseCode = "200", content = [Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE, schema = Schema(type = "string", format = "binary"))])])
     @PostMapping("/sumehr/{patientId}/export", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
@@ -163,10 +163,10 @@ class KmehrController(
         @PathVariable patientId: String,
         @RequestParam language: String,
         @RequestBody info: SumehrExportInfoDto
-    ) = mono {
+    ) = flow {
         patientLogic.getPatient(patientId)?.let {
             healthcarePartyLogic.getHealthcareParty(sessionLogic.getCurrentHealthcarePartyId())?.let { hcp ->
-                sumehrLogicV1.validateSumehr(
+                emitAll(sumehrLogicV1.validateSumehr(
                     it,
                     info.secretForeignKeys,
                     hcp,
@@ -187,10 +187,10 @@ class KmehrController(
                         defaultLanguage = "en",
                         format = Config.Format.SUMEHR,
                     )
-                )
+                ))
             }
         } ?: throw IllegalArgumentException("Missing argument")
-    }
+    }.injectReactorContext()
 
     @Operation(summary = "Get sumehr elements")
     @PostMapping("/sumehr/{patientId}/content")
@@ -287,7 +287,7 @@ class KmehrController(
                 )
             }
         } ?: throw IllegalArgumentException("Missing argument")
-    }
+    }.injectReactorContext()
 
     @Operation(summary = "Validate sumehr", responses = [ApiResponse(responseCode = "200", content = [Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE, schema = Schema(type = "string", format = "binary"))])])
     @PostMapping("/sumehrv2/{patientId}/validate", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
@@ -295,10 +295,10 @@ class KmehrController(
         @PathVariable patientId: String,
         @RequestParam language: String,
         @RequestBody info: SumehrExportInfoDto
-    ) = mono {
+    ) = flow {
         patientLogic.getPatient(patientId)?.let {
             healthcarePartyLogic.getHealthcareParty(sessionLogic.getCurrentHealthcarePartyId())?.let { hcp ->
-                sumehrLogicV2.validateSumehr(
+                emitAll(sumehrLogicV2.validateSumehr(
                     it,
                     info.secretForeignKeys,
                     hcp,
@@ -319,10 +319,10 @@ class KmehrController(
                         defaultLanguage = "en",
                         format = Config.Format.SUMEHR,
                     ),
-                )
+                ))
             }
         } ?: throw IllegalArgumentException("Missing argument")
-    }
+    }.injectReactorContext()
 
     @Operation(summary = "Get sumehr elements")
     @PostMapping("/sumehrv2/{patientId}/content")
