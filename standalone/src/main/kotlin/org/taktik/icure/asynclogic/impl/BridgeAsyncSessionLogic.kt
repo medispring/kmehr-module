@@ -65,7 +65,8 @@ class BridgeAsyncSessionLogic(
         username: String,
         password: String,
         session: WebSession?,
-        groupId: String?
+        groupId: String?,
+        applicationId: String?
     ): Authentication? {
         throw BridgeException()
     }
