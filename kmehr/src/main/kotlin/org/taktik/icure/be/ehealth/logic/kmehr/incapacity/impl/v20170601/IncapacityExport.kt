@@ -349,6 +349,7 @@ class IncapacityExport(
                                                 ids.add(IDPATIENT().apply { s = IDPATIENTschemes.LOCAL; sv = config.soft?.version; sl = "${config.soft?.name}-Person-Id"; value = "cp" })
                                                 firstnames.add("dummyname")
                                                 familyname = "dummyname"
+                                                sex = SexType().apply { cd = CDSEX().apply { s = "CD-SEX"; sv = "1.1"; value = CDSEXvalues.UNKNOWN } }
                                                 telecoms.add(
                                                     TelecomType().apply {
                                                         cds.add(CDTELECOM().apply { s(CDTELECOMschemes.CD_TELECOM); value = "phone" })
