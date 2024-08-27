@@ -1,15 +1,31 @@
 package org.taktik.icure.asynclogic.bridge
 
+import com.icure.sdk.utils.Serialization
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.flow.Flow
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.couchdb.id.Identifiable
+import org.taktik.icure.domain.filter.AbstractFilter
 import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 
-@Suppress("UNUSED_PARAMETER", "RedundantSuspendModifier")
+@Suppress("UNUSED_PARAMETER", "RedundantSuspendModifier", "unused")
 open class GenericLogicBridge<E : Identifiable<String>> {
+
+    protected val bridgeHttpClient = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(json = Serialization.json)
+        }
+    }
+
+    open fun matchEntitiesBy(filter: AbstractFilter<*>): Flow<String> {
+        throw BridgeException()
+    }
 
     fun solveConflicts(limit: Int?, ids: List<String>?): Flow<IdAndRev> {
         throw BridgeException()

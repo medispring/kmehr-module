@@ -14,6 +14,7 @@ import org.taktik.icure.asynclogic.HealthcarePartyLogic
 import org.taktik.icure.be.ehealth.dto.SumehrStatus
 import org.taktik.icure.be.ehealth.logic.kmehr.Config
 import org.taktik.icure.be.ehealth.logic.kmehr.sumehr.SumehrLogic
+import org.taktik.icure.domain.filter.impl.service.ServiceByHcPartyTagCodeDateFilter
 import org.taktik.icure.domain.mapping.ImportMapping
 import org.taktik.icure.domain.result.ImportResult
 import org.taktik.icure.entities.HealthElement
@@ -43,7 +44,14 @@ class SumehrLogicImpl(
 ) : SumehrLogic {
 
     override suspend fun isSumehrValid(hcPartyId: String, patient: Patient, patientSecretForeignKeys: List<String>, excludedIds: List<String>, includeIrrelevantInformation: Boolean): SumehrStatus {
-        val sumehrServiceIds = contactLogic.listServiceIdsByTag(hcPartyId, patientSecretForeignKeys, "CD-TRANSACTION", "sumehr", null, null).toList()
+        val sumehrServiceIds = contactLogic.matchEntitiesBy(
+            ServiceByHcPartyTagCodeDateFilter(
+                healthcarePartyId = hcPartyId,
+                patientSecretForeignKeys = patientSecretForeignKeys,
+                tagType = "CD-TRANSACTION",
+                tagCode = "sumehr"
+            )
+        ).toList()
 
         if (sumehrServiceIds.isEmpty()) {
             return SumehrStatus.absent

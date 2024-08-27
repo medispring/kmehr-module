@@ -1,46 +1,45 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.apis.UserApi
-import io.icure.kraken.client.security.ExternalJWTProvider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.icure.sdk.api.raw.impl.RawUserApiImpl
+import com.icure.sdk.api.raw.successBodyOrNull404
+import com.icure.sdk.utils.InternalIcureApi
+import com.icure.sdk.utils.Serialization
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.ViewQueryResultEvent
 import org.taktik.icure.asynclogic.UserLogic
+import org.taktik.icure.asynclogic.bridge.auth.KmehrAuthProvider
+import org.taktik.icure.asynclogic.bridge.mappers.UserMapper
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.User
 import org.taktik.icure.entities.base.PropertyStub
-import org.taktik.icure.entities.utils.ExternalFilterKey
+import org.taktik.icure.errors.UnauthorizedException
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
-import org.taktik.icure.services.external.rest.v2.dto.UserDto
-import org.taktik.icure.services.external.rest.v2.mapper.UnsecureUserV2Mapper
 
-@OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
 @Service
 class UserLogicBridge(
     private val asyncSessionLogic: BridgeAsyncSessionLogic,
     private val bridgeConfig: BridgeConfig,
-    private val userMapper: UnsecureUserV2Mapper
+    private val userMapper: UserMapper
 ) : GenericLogicBridge<User>(), UserLogic {
 
-    private val userDtoToUser: (UserDto) -> User = {
-        userMapper.map(it.copy(
-            authenticationTokens = it.authenticationTokens.mapValues { (_, token) -> token.copy(token = "*") }
-        ))
-    }
-
+    @OptIn(InternalIcureApi::class)
     private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let { token ->
-        UserApi(basePath = bridgeConfig.iCureUrl, authProvider = ExternalJWTProvider(token))
-    }
+        RawUserApiImpl(
+            apiUrl = bridgeConfig.iCureUrl,
+            authProvider = KmehrAuthProvider(token),
+            httpClient = bridgeHttpClient,
+            json = Serialization.json
+        )
+    } ?: throw UnauthorizedException("You must be logged in to perform this operation")
 
     override suspend fun createOrUpdateToken(
         userIdentifier: String,
@@ -86,8 +85,9 @@ class UserLogicBridge(
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     override suspend fun getUser(id: String): User? =
-        getApi()?.getUser(id)?.let(userDtoToUser)
+        getApi().getUser(id).successBodyOrNull404()?.let(userMapper::map)
 
     override suspend fun getUserByEmail(email: String): User? {
         throw BridgeException()
@@ -113,12 +113,9 @@ class UserLogicBridge(
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     override fun listUserIdsByHcpartyId(hcpartyId: String): Flow<String> = flow {
-        emitAll(getApi()?.findByHcpartyId(hcpartyId)?.asFlow() ?: emptyFlow())
-    }
-
-    override fun listUserIdsByNameEmailPhone(searchString: String): Flow<String> {
-        throw BridgeException()
+        emitAll(getApi().findByHcpartyId(hcpartyId).successBody().asFlow())
     }
 
     override fun listUsers(

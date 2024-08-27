@@ -807,7 +807,7 @@ private fun StringSpec.findAmpsByAtcE2ETest(
         })
 
         val responseString = httpClient.makeGetRequest(
-            "$samUrl/rest/$apiVersion/be_samv2/vmp/byAtc/${atcCode}",
+            "$samUrl/rest/$apiVersion/be_samv2/amp/byAtc/${atcCode}",
             mapOf("Authorization" to "Bearer ${credentialsProvider.getCredentials(CredentialsType.HCP).authJWT!!}")
         )
         responseString shouldNotBe null
@@ -833,7 +833,7 @@ private fun StringSpec.findAmpsByAtcE2ETest(
         })
 
         val responseString = httpClient.makeGetRequest(
-            "$samUrl/rest/$apiVersion/be_samv2/vmp/byAtc/${uuid()}",
+            "$samUrl/rest/$apiVersion/be_samv2/amp/byAtc/${uuid()}",
             mapOf("Authorization" to "Bearer ${credentialsProvider.getCredentials(CredentialsType.HCP).authJWT!!}")
         )
         responseString shouldNotBe null

@@ -1,53 +1,65 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.apis.ContactApi
-import io.icure.kraken.client.security.ExternalJWTProvider
-import io.jsonwebtoken.JwtException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.icure.sdk.api.raw.impl.RawContactApiImpl
+import com.icure.sdk.api.raw.successBodyOrNull404
+import com.icure.sdk.crypto.impl.NoAccessControlKeysHeadersProvider
+import com.icure.sdk.model.ListOfIds
+import com.icure.sdk.utils.InternalIcureApi
+import com.icure.sdk.utils.Serialization
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Service as SpringService
 import org.taktik.couchdb.ViewQueryResultEvent
 import org.taktik.couchdb.entity.ComplexKey
-import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.ContactLogic
+import org.taktik.icure.asynclogic.bridge.auth.KmehrAuthProvider
+import org.taktik.icure.asynclogic.bridge.mappers.ContactFilterMapper
+import org.taktik.icure.asynclogic.bridge.mappers.ContactMapper
+import org.taktik.icure.asynclogic.bridge.mappers.ServiceFilterMapper
+import org.taktik.icure.asynclogic.bridge.mappers.ServiceMapper
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.db.PaginationOffset
+import org.taktik.icure.domain.filter.AbstractFilter
 import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.Contact
 import org.taktik.icure.entities.data.LabelledOccurence
 import org.taktik.icure.entities.embed.Delegation
-import org.taktik.icure.entities.embed.Identifier
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
-import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
-import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
-import org.taktik.icure.services.external.rest.v2.mapper.ContactV2Mapper
-import org.taktik.icure.services.external.rest.v2.mapper.embed.ServiceV2Mapper
+import org.taktik.icure.entities.embed.Service
+import org.taktik.icure.errors.UnauthorizedException
 
-@OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
-@Service
+@SpringService
 class ContactLogicBridge(
     private val asyncSessionLogic: BridgeAsyncSessionLogic,
     private val bridgeConfig: BridgeConfig,
-    private val contactMapper: ContactV2Mapper,
-    private val serviceMapper: ServiceV2Mapper
+    private val contactMapper: ContactMapper,
+    private val serviceMapper: ServiceMapper,
+    private val contactFilterMapper: ContactFilterMapper,
+    private val serviceFilterMapper: ServiceFilterMapper
 ) : GenericLogicBridge<Contact>(), ContactLogic {
 
+    @OptIn(InternalIcureApi::class)
     private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let { token ->
-        ContactApi(basePath = bridgeConfig.iCureUrl, authProvider = ExternalJWTProvider(token))
-    }
+        RawContactApiImpl(
+            apiUrl = bridgeConfig.iCureUrl,
+            authProvider = KmehrAuthProvider(token),
+            httpClient = bridgeHttpClient,
+            json = Serialization.json,
+            accessControlKeysHeadersProvider = NoAccessControlKeysHeadersProvider
+        )
+    } ?: throw UnauthorizedException("You must be logged in to perform this operation")
 
+    @OptIn(InternalIcureApi::class)
     override suspend fun createContact(contact: Contact): Contact? =
-        getApi()?.createContact(contactMapper.map(contact))?.let(contactMapper::map)
+        getApi().createContact(contactMapper.map(contact)).successBody().let(contactMapper::map)
 
     override fun createContacts(contacts: Flow<Contact>): Flow<Contact> {
         throw BridgeException()
@@ -74,8 +86,8 @@ class ContactLogicBridge(
 
     override fun filterServices(
         paginationOffset: PaginationOffset<Nothing>,
-        filter: FilterChain<org.taktik.icure.entities.embed.Service>
-    ): Flow<org.taktik.icure.entities.embed.Service> {
+        filter: FilterChain<Service>
+    ): Flow<Service> {
         throw BridgeException()
     }
 
@@ -92,8 +104,9 @@ class ContactLogicBridge(
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     override suspend fun getContact(id: String): Contact? =
-        getApi()?.getContact(id)?.let(contactMapper::map)
+        getApi().getContact(id).successBodyOrNull404()?.let(contactMapper::map)
 
     override fun getContacts(selectedIds: Collection<String>): Flow<Contact> {
         throw BridgeException()
@@ -107,38 +120,20 @@ class ContactLogicBridge(
         throw BridgeException()
     }
 
-    override fun getServices(selectedServiceIds: Collection<String>): Flow<org.taktik.icure.entities.embed.Service> = flow {
-        emitAll(
-            getApi()
-                ?.getServices(ListOfIdsDto(ids = selectedServiceIds.toList()))
-                ?.map(serviceMapper::map)
-                ?.asFlow() ?: emptyFlow()
+    @OptIn(InternalIcureApi::class)
+    override fun getServices(selectedServiceIds: Collection<String>): Flow<Service> = flow {
+        emitAll(getApi()
+            .getServices(ListOfIds(ids = selectedServiceIds.toList()))
+            .successBody()
+            .map(serviceMapper::map)
+            .asFlow()
         )
     }
-
 
     override fun getServicesLinkedTo(
         ids: List<String>,
         linkType: String?
-    ): Flow<org.taktik.icure.entities.embed.Service> {
-        throw BridgeException()
-    }
-
-    override fun listContactIds(hcPartyId: String): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listContactIdsByCode(
-        hcPartyId: String,
-        codeType: String,
-        codeCode: String,
-        startValueDate: Long?,
-        endValueDate: Long?
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listContactIdsByHCPartyAndPatient(hcPartyId: String, secretPatientKeys: List<String>): Flow<String> {
+    ): Flow<Service> {
         throw BridgeException()
     }
 
@@ -152,30 +147,17 @@ class ContactLogicBridge(
         throw BridgeException()
     }
 
-    override fun listContactIdsByHcPartyAndIdentifiers(hcPartyId: String, identifiers: List<Identifier>): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listContactIdsByTag(
-        hcPartyId: String,
-        tagType: String,
-        tagCode: String,
-        startValueDate: Long?,
-        endValueDate: Long?
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
     override fun listContactsByExternalId(externalId: String): Flow<Contact> {
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     override fun listContactsByHCPartyAndPatient(hcPartyId: String, secretPatientKeys: List<String>): Flow<Contact> = flow {
-        emitAll(
-            getApi()
-                ?.listContactsByHCPartyAndPatientForeignKeys(hcPartyId, ListOfIdsDto(ids = secretPatientKeys))
-                ?.map(contactMapper::map)
-                ?.asFlow() ?: emptyFlow()
+        emitAll(getApi()
+            .listContactsByHCPartyAndPatientForeignKeys(hcPartyId, ListOfIds(ids = secretPatientKeys))
+            .successBody()
+            .map(contactMapper::map)
+            .asFlow()
         )
     }
 
@@ -191,124 +173,33 @@ class ContactLogicBridge(
         throw BridgeException()
     }
 
-    override fun listIdsByServices(services: Collection<String>): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listServiceIdsByCode(
-        hcPartyId: String,
-        patientSecretForeignKeys: List<String>?,
-        codeType: String,
-        codeCode: String,
-        startValueDate: Long?,
-        endValueDate: Long?,
-        descending: Boolean
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listServiceIdsByHcParty(hcPartyId: String): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listServiceIdsByHcPartyAndHealthElementIds(
-        hcPartyId: String,
-        healthElementIds: List<String>
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listServiceIdsByHcPartyAndIdentifiers(hcPartyId: String, identifiers: List<Identifier>): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listServiceIdsByTag(
-        hcPartyId: String,
-        patientSecretForeignKeys: List<String>?,
-        tagType: String,
-        tagCode: String,
-        startValueDate: Long?,
-        endValueDate: Long?,
-        descending: Boolean
-    ): Flow<String> = flow {
-        patientSecretForeignKeys?.forEach { foreignKey ->
-            emitAll(
-                listServiceIdsByTagRecursive(
-                    hcPartyId,
-                    foreignKey,
-                    tagType,
-                    tagCode,
-                    startValueDate,
-                    endValueDate,
-                    null
-                )
-            )
-        }
-    }
-
-    private fun listServiceIdsByTagRecursive(
-        hcPartyId: String,
-        patientSecretForeignKey: String?,
-        tagType: String,
-        tagCode: String,
-        startValueDate: Long?,
-        endValueDate: Long?,
-        startDocumentId: String? = null
-    ): Flow<String> = flow {
-        val result = getApi()?.filterServicesBy(
-            io.icure.kraken.client.models.filter.chain.FilterChain(
-                filter = io.icure.kraken.client.models.filter.service.ServiceByHcPartyTagCodeDateFilter(
-                    healthcarePartyId = hcPartyId,
-                    patientSecretForeignKey = patientSecretForeignKey,
-                    tagType = tagType,
-                    tagCode = tagCode,
-                    startValueDate = startValueDate,
-                    endValueDate = endValueDate
-                )
-            ),
-            startDocumentId = startDocumentId,
-            limit = 1000
-        ) ?: throw JwtException("Invalid JWT")
-        emitAll(result.rows.map { it.id }.asFlow())
-        if(result.nextKeyPair?.startKeyDocId != null) {
-            emitAll(
-                listServiceIdsByTagRecursive(
-                    hcPartyId,
-                    patientSecretForeignKey,
-                    tagType,
-                    tagCode,
-                    startValueDate,
-                    endValueDate,
-                    result.nextKeyPair?.startKeyDocId
-                )
-            )
-        }
-    }
-
-    override fun listServicesByAssociationId(associationId: String): Flow<org.taktik.icure.entities.embed.Service> {
+    override fun listServicesByAssociationId(associationId: String): Flow<Service> {
         throw BridgeException()
     }
 
     override fun listServicesByHcPartyAndHealthElementIds(
         hcPartyId: String,
         healthElementIds: List<String>
-    ): Flow<org.taktik.icure.entities.embed.Service> {
+    ): Flow<Service> {
         throw BridgeException()
     }
 
-    override fun listServicesByHcPartyAndSecretForeignKeys(
-        hcPartyId: String,
-        patientSecretForeignKeys: Set<String>
-    ): Flow<String> {
-        throw BridgeException()
-    }
-
+    @OptIn(InternalIcureApi::class)
     override fun modifyEntities(entities: Flow<Contact>): Flow<Contact> = flow {
         emitAll(
-            getApi()?.modifyContacts(
+            getApi().modifyContacts(
                 entities.map(contactMapper::map).toList()
-            )?.map(contactMapper::map)?.asFlow() ?: emptyFlow()
+            ).successBody().map(contactMapper::map).asFlow()
         )
+    }
+
+    @OptIn(InternalIcureApi::class)
+    override fun matchEntitiesBy(filter: AbstractFilter<*>): Flow<String> = flow {
+        contactFilterMapper.mapOrNull(filter)?.also {
+            emitAll(getApi().matchContactsBy(it).successBody().asFlow())
+        } ?: serviceFilterMapper.mapOrNull(filter)?.also {
+            emitAll(getApi().matchServicesBy(it).successBody().asFlow())
+        } ?: throw IllegalArgumentException("Unsupported filter ${filter::class.simpleName}")
     }
 
     override fun modifyEntities(entities: Collection<Contact>): Flow<Contact> = modifyEntities(entities.asFlow())

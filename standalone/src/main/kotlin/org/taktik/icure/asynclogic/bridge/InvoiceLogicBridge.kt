@@ -1,18 +1,20 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.apis.InvoiceApi
-import io.icure.kraken.client.security.ExternalJWTProvider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.icure.sdk.api.raw.impl.RawInvoiceApiImpl
+import com.icure.sdk.crypto.impl.NoAccessControlKeysHeadersProvider
+import com.icure.sdk.model.ListOfIds
+import com.icure.sdk.utils.InternalIcureApi
+import com.icure.sdk.utils.Serialization
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.entity.ComplexKey
-import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.InvoiceLogic
+import org.taktik.icure.asynclogic.bridge.auth.KmehrAuthProvider
+import org.taktik.icure.asynclogic.bridge.mappers.InvoiceMapper
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.db.PaginationOffset
@@ -24,23 +26,27 @@ import org.taktik.icure.entities.embed.InvoicingCode
 import org.taktik.icure.entities.embed.MediumType
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
-import org.taktik.icure.entities.utils.ExternalFilterKey
+import org.taktik.icure.errors.UnauthorizedException
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
-import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
-import org.taktik.icure.services.external.rest.v2.mapper.InvoiceV2Mapper
 
-@OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
 @Service
 class InvoiceLogicBridge(
     private val asyncSessionLogic: BridgeAsyncSessionLogic,
     private val bridgeConfig: BridgeConfig,
-    private val invoiceMapper: InvoiceV2Mapper
+    private val invoiceMapper: InvoiceMapper
 ) : GenericLogicBridge<Invoice>(), InvoiceLogic {
 
-    private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let {
-        InvoiceApi(basePath = bridgeConfig.iCureUrl, authProvider = ExternalJWTProvider(it))
-    }
+    @OptIn(InternalIcureApi::class)
+    private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let { token ->
+        RawInvoiceApiImpl(
+            apiUrl = bridgeConfig.iCureUrl,
+            authProvider = KmehrAuthProvider(token),
+            httpClient = bridgeHttpClient,
+            json = Serialization.json,
+            accessControlKeysHeadersProvider = NoAccessControlKeysHeadersProvider
+        )
+    } ?: throw UnauthorizedException("You must be logged in to perform this operation")
 
     override fun appendCodes(
         hcPartyId: String,
@@ -89,11 +95,13 @@ class InvoiceLogicBridge(
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     override fun getInvoices(ids: List<String>): Flow<Invoice> = flow {
-        emitAll(
-            getApi()?.getInvoices(ListOfIdsDto(ids = ids))
-                ?.map { invoiceMapper.map(it) }
-                ?.asFlow() ?: emptyFlow()
+        emitAll(getApi()
+            .getInvoices(ListOfIds(ids = ids))
+            .successBody()
+            .map(invoiceMapper::map)
+            .asFlow()
         )
     }
 
@@ -109,15 +117,6 @@ class InvoiceLogicBridge(
     }
 
     override fun getUnsentInvoicesForUsersAndInsuranceIds(userIds: List<String>?): Flow<Invoice> {
-        throw BridgeException()
-    }
-
-    override fun listInvoiceIdsByTarificationsByCode(
-        hcPartyId: String,
-        codeCode: String?,
-        startValueDate: Long?,
-        endValueDate: Long?,
-    ): Flow<String> {
         throw BridgeException()
     }
 

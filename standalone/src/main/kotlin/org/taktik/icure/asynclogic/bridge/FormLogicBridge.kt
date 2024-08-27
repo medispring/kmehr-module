@@ -1,43 +1,48 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.apis.FormApi
-import io.icure.kraken.client.security.ExternalJWTProvider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.icure.sdk.api.raw.impl.RawFormApiImpl
+import com.icure.sdk.api.raw.successBodyOrNull404
+import com.icure.sdk.crypto.impl.NoAccessControlKeysHeadersProvider
+import com.icure.sdk.utils.InternalIcureApi
+import com.icure.sdk.utils.Serialization
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
-import org.taktik.couchdb.entity.IdAndRev
 import org.taktik.icure.asynclogic.FormLogic
+import org.taktik.icure.asynclogic.bridge.auth.KmehrAuthProvider
+import org.taktik.icure.asynclogic.bridge.mappers.FormMapper
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.Form
 import org.taktik.icure.entities.embed.Delegation
 import org.taktik.icure.entities.requests.BulkShareOrUpdateMetadataParams
 import org.taktik.icure.entities.requests.EntityBulkShareResult
-import org.taktik.icure.entities.utils.ExternalFilterKey
+import org.taktik.icure.errors.UnauthorizedException
 import org.taktik.icure.exceptions.BridgeException
-import org.taktik.icure.services.external.rest.v2.mapper.FormV2Mapper
 
-@OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
 @Service
 class FormLogicBridge(
     private val asyncSessionLogic: BridgeAsyncSessionLogic,
     private val bridgeConfig: BridgeConfig,
-    private val formMapper: FormV2Mapper
+    private val formMapper: FormMapper
 ) : GenericLogicBridge<Form>(), FormLogic {
 
-    private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let {
-        FormApi(basePath = bridgeConfig.iCureUrl, authProvider = ExternalJWTProvider(it))
-    }
+    @OptIn(InternalIcureApi::class)
+    private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let { token ->
+        RawFormApiImpl(
+            apiUrl = bridgeConfig.iCureUrl,
+            authProvider = KmehrAuthProvider(token),
+            httpClient = bridgeHttpClient,
+            json = Serialization.json,
+            accessControlKeysHeadersProvider = NoAccessControlKeysHeadersProvider
+        )
+    } ?: throw UnauthorizedException("You must be logged in to perform this operation")
 
+    @OptIn(InternalIcureApi::class)
     override suspend fun createForm(form: Form): Form? =
-        getApi()?.createForm(form.let(formMapper::map))?.let(formMapper::map)
+        getApi().createForm(form.let(formMapper::map)).successBodyOrNull404()?.let(formMapper::map)
 
     override fun deleteForms(ids: Set<String>): Flow<DocIdentifier> {
-        throw BridgeException()
-    }
-
-    override suspend fun getAllByLogicalUuid(formUuid: String): List<Form> {
         throw BridgeException()
     }
 
@@ -49,11 +54,15 @@ class FormLogicBridge(
         throw BridgeException()
     }
 
-    override fun bulkShareOrUpdateMetadata(requests: BulkShareOrUpdateMetadataParams): Flow<EntityBulkShareResult<Form>> {
+    override fun listFormsByLogicalUuid(formUuid: String, descending: Boolean): Flow<Form> {
         throw BridgeException()
     }
 
-    override suspend fun getAllByUniqueId(lid: String): List<Form> {
+    override fun listFormsByUniqueId(lid: String, descending: Boolean): Flow<Form> {
+        throw BridgeException()
+    }
+
+    override fun bulkShareOrUpdateMetadata(requests: BulkShareOrUpdateMetadataParams): Flow<EntityBulkShareResult<Form>> {
         throw BridgeException()
     }
 

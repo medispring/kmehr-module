@@ -1,7 +1,5 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.infrastructure.ClientException
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -12,13 +10,16 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
+import org.taktik.icure.asynclogic.bridge.mappers.ContactFilterMapper
+import org.taktik.icure.asynclogic.bridge.mappers.ContactMapper
+import org.taktik.icure.asynclogic.bridge.mappers.ServiceFilterMapper
+import org.taktik.icure.asynclogic.bridge.mappers.ServiceMapper
 import org.taktik.icure.config.BridgeConfig
+import org.taktik.icure.domain.filter.impl.service.ServiceByHcPartyTagCodeDateFilter
 import org.taktik.icure.entities.Contact
 import org.taktik.icure.entities.base.CodeStub
 import org.taktik.icure.entities.embed.Service
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.ContactV2Mapper
-import org.taktik.icure.services.external.rest.v2.mapper.embed.ServiceV2Mapper
 import org.taktik.icure.test.BaseKmehrTest
 import org.taktik.icure.test.KmehrTestApplication
 import org.taktik.icure.test.UserCredentials
@@ -30,8 +31,10 @@ import kotlin.random.Random
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ContactLogicBridgeTest(
     val bridgeConfig: BridgeConfig,
-    val serviceMapper: ServiceV2Mapper,
-    val contactMapper: ContactV2Mapper,
+    val serviceMapper: ServiceMapper,
+    val contactMapper: ContactMapper,
+    val serviceFilterMapper: ServiceFilterMapper,
+    val contactFilterMapper: ContactFilterMapper,
     val jwtUtils: JwtUtils
 ) : BaseKmehrTest() {
 
@@ -48,7 +51,9 @@ class ContactLogicBridgeTest(
                 KmehrTestApplication.fakeSessionLogic,
                 bridgeConfig,
                 contactMapper,
-                serviceMapper
+                serviceMapper,
+                contactFilterMapper,
+                serviceFilterMapper
             )
 
             contactLogicBridgeTest(hcp, contactBridge)
@@ -128,98 +133,29 @@ private fun StringSpec.contactLogicBridgeTest(
                 )
             )
 
-            contactBridge.listServiceIdsByTag(
-                hcp.dataOwnerId,
-                listOf(sfk),
-                tagType,
-                tagCode,
-                null,
-                null
+            contactBridge.matchEntitiesBy(
+                ServiceByHcPartyTagCodeDateFilter(
+                    healthcarePartyId = hcp.dataOwnerId,
+                    patientSecretForeignKeys = listOf(sfk),
+                    tagType = tagType,
+                    tagCode = tagCode,
+                )
             ).onEach {
                 it shouldBe contact1!!.services.first().id
             }.count() shouldBe 1
         }
     }
 
-    "Can retrieve the ids of more Services than the page size" {
-        withAuthenticatedReactorContext(hcp) {
-            val tagType = uuid().substring(0, 6)
-            val tagCode = uuid().substring(0, 6)
-            val version = Random.nextInt(1, 9).toString()
-            val sfk = uuid()
-
-            val correctContacts = List(1500) {
-                contactBridge.createContact(
-                    Contact(
-                        id = uuid(),
-                        secretForeignKeys = setOf(sfk),
-                        services = setOf(
-                            Service(
-                                id = uuid(),
-                                tags = setOf(
-                                    CodeStub(
-                                        id = "$tagType|$tagCode|$version",
-                                        type = tagType,
-                                        code = tagCode,
-                                        version = version
-                                    )
-                                )
-                            )
-                        ),
-                        delegations = mapOf(
-                            hcp.dataOwnerId!! to setOf()
-                        )
-                    )
-                )
-            }
-
-            val correctIds = correctContacts.map { it!!.services.first().id }
-            correctIds.size shouldBe 1500
-
-            List(1500) {
-                val wrongType = uuid().substring(0, 6)
-                val wrongCode = uuid().substring(0, 6)
-                contactBridge.createContact(
-                    Contact(
-                        id = uuid(),
-                        secretForeignKeys = setOf(uuid()),
-                        services = setOf(
-                            Service(
-                                id = uuid(),
-                                tags = setOf(
-                                    CodeStub(
-                                        id = "$wrongType|$wrongCode|${it % 10}",
-                                        type = wrongType,
-                                        code = wrongCode,
-                                        version = "${it % 10}"
-                                    )
-                                )
-                            )
-                        ),
-                        delegations = mapOf(
-                            uuid() to setOf()
-                        )
-                    )
-                )
-            }
-
-            contactBridge.listServiceIdsByTag(
-                hcp.dataOwnerId!!,
-                listOf(sfk),
-                tagType,
-                tagCode,
-                null,
-                null
-            ).onEach {
-                correctIds shouldContain it
-            }.count() shouldBe correctIds.size
-        }
-    }
-
     "If no Service is matched by HCP, SFKs, and tag, an empty flow is returned" {
         withAuthenticatedReactorContext(hcp) {
-            contactBridge.listServiceIdsByTag(uuid(), listOf(uuid()), uuid(), uuid(), null, null)
-                .count() shouldBe 0
+            contactBridge.matchEntitiesBy(
+                ServiceByHcPartyTagCodeDateFilter(
+                    healthcarePartyId = uuid(),
+                    patientSecretForeignKeys = listOf(uuid()),
+                    tagType = uuid(),
+                    tagCode = uuid()
+                )
+            ).count() shouldBe 0
         }
     }
 

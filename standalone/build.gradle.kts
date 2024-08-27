@@ -96,7 +96,7 @@ dependencies {
     implementation(coreLibs.bundles.jsonWebTokenLibs)
     implementation(coreLibs.bundles.bouncyCastleLibs)
     implementation(coreLibs.bundles.kotlinxCoroutinesLibs)
-    implementation(coreLibs.bundles.ktorClientLibs)
+    implementation(kmehrLibs.bundles.ktorClientLibs)
     implementation(coreLibs.bundles.jacksonLibs)
 
     implementation(kmehrLibs.icureKotlinSDK)
@@ -106,8 +106,6 @@ dependencies {
 
     implementation(coreLibs.springAspects)
     implementation(coreLibs.springWebsocket)
-
-    implementation(coreLibs.ktorSerialization)
 
     implementation(coreLibs.asyncJacksonHttpClient)
 

@@ -1,51 +1,60 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.apis.HealthcarePartyApi
-import io.icure.kraken.client.infrastructure.ClientException
-import io.icure.kraken.client.security.ExternalJWTProvider
-import io.jsonwebtoken.JwtException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.icure.sdk.api.raw.RawHealthcarePartyApi
+import com.icure.sdk.api.raw.impl.RawHealthcarePartyApiImpl
+import com.icure.sdk.api.raw.successBodyOrNull404
+import com.icure.sdk.model.ListOfIds
+import com.icure.sdk.model.filter.hcparty.HealthcarePartyByNationalIdentifierFilter
+import com.icure.sdk.utils.InternalIcureApi
+import com.icure.sdk.utils.RequestStatusException
+import com.icure.sdk.utils.Serialization
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filter
+import com.icure.sdk.model.HealthcareParty as SdkHealthcareParty
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonElement
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.couchdb.ViewQueryResultEvent
 import org.taktik.couchdb.entity.ComplexKey
 import org.taktik.icure.asynclogic.HealthcarePartyLogic
+import org.taktik.icure.asynclogic.bridge.auth.KmehrAuthProvider
+import org.taktik.icure.asynclogic.bridge.mappers.HealthcarePartyMapper
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.HealthcareParty
-import org.taktik.icure.entities.embed.Identifier
-import org.taktik.icure.entities.utils.ExternalFilterKey
+import org.taktik.icure.errors.UnauthorizedException
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
-import org.taktik.icure.services.external.rest.v2.dto.HealthcarePartyDto
-import org.taktik.icure.services.external.rest.v2.dto.ListOfIdsDto
-import org.taktik.icure.services.external.rest.v2.mapper.HealthcarePartyV2Mapper
 
-@OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
 @Service
 class HealthcarePartyLogicBridge(
     private val asyncSessionLogic: BridgeAsyncSessionLogic,
     private val bridgeConfig: BridgeConfig,
-    private val healthcarePartyMapper: HealthcarePartyV2Mapper
+    private val healthcarePartyMapper: HealthcarePartyMapper
 ) : GenericLogicBridge<HealthcareParty>(), HealthcarePartyLogic {
 
+    @OptIn(InternalIcureApi::class)
     private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let { token ->
-        HealthcarePartyApi(basePath = bridgeConfig.iCureUrl, authProvider = ExternalJWTProvider(token))
-    }
+        RawHealthcarePartyApiImpl(
+            apiUrl = bridgeConfig.iCureUrl,
+            authProvider = KmehrAuthProvider(token),
+            httpClient = bridgeHttpClient,
+            json = Serialization.json
+        )
+    } ?: throw UnauthorizedException("You must be logged in to perform this operation")
 
 
+    @OptIn(InternalIcureApi::class)
     override suspend fun createHealthcareParty(healthcareParty: HealthcareParty): HealthcareParty? =
-        getApi()?.createHealthcareParty(healthcarePartyMapper.map(healthcareParty))
-            ?.let { healthcarePartyMapper.map(it) }
+        getApi().createHealthcareParty(healthcarePartyMapper.map(healthcareParty))
+            .successBody()
+            .let { healthcarePartyMapper.map(it) }
 
     override fun deleteHealthcareParties(healthcarePartyIds: List<String>): Flow<DocIdentifier> {
         throw BridgeException()
@@ -87,40 +96,45 @@ class HealthcarePartyLogicBridge(
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     private suspend fun getHcpHierarchyIdsRecursive(
-        api: HealthcarePartyApi,
+        api: RawHealthcarePartyApi,
         healthcarePartyId: String?,
         hcpHierarchy: Set<String> = emptySet()
     ): Set<String> =
         if (healthcarePartyId != null) {
             try {
-                val hcp = api.getHealthcareParty(healthcarePartyId)
+                val hcp = api.getHealthcareParty(healthcarePartyId).successBody()
                 getHcpHierarchyIdsRecursive(api, hcp.parentId, hcpHierarchy + healthcarePartyId)
-            } catch (e: ClientException) {
+            } catch (e: RequestStatusException) {
                 hcpHierarchy
             }
         } else hcpHierarchy
 
 
+    @OptIn(InternalIcureApi::class)
     override suspend fun getHcpHierarchyIds(sender: HealthcareParty): HashSet<String> =
-        getApi()?.let { getHcpHierarchyIdsRecursive(it, sender.id).toHashSet() } ?: HashSet()
+        getApi().let { getHcpHierarchyIdsRecursive(it, sender.id).toHashSet() }
 
+    @OptIn(InternalIcureApi::class)
     override fun getHealthcareParties(ids: List<String>): Flow<HealthcareParty> =
         if(ids.isNotEmpty()) flow {
-        emitAll(
-            getApi()
-                ?.getHealthcareParties(ListOfIdsDto( ids = ids ))
-                ?.map { healthcarePartyMapper.map(it)  }
-                ?.asFlow() ?: emptyFlow()
-        )
-    } else emptyFlow()
+            emitAll(
+                getApi()
+                    .getHealthcareParties(ListOfIds( ids = ids ))
+                    .successBody()
+                    .map(healthcarePartyMapper::map)
+                    .asFlow()
+            )
+        } else emptyFlow()
 
     override fun getHealthcarePartiesByParentId(parentId: String): Flow<HealthcareParty> {
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     override suspend fun getHealthcareParty(id: String): HealthcareParty? =
-        getApi()?.getHealthcareParty(id)?.let {
+        getApi().getHealthcareParty(id).successBody().let {
             healthcarePartyMapper.map(it)
         }
 
@@ -142,26 +156,27 @@ class HealthcarePartyLogicBridge(
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     private fun findHealthcarePartiesByNameRecursive(
         name: String,
         desc: Boolean? = null,
-        startKey: String? = null,
+        startKey: JsonElement? = null,
         startDocumentId: String? = null
-    ) : Flow<HealthcarePartyDto> = flow {
-        val result = getApi()?.findHealthcarePartiesByName(
+    ) : Flow<HealthcareParty> = flow {
+        val result = getApi().findHealthcarePartiesByName(
             name = name,
-            startKey = startKey,
+            startKey = startKey?.let { Serialization.json.encodeToString(it) },
             startDocumentId = startDocumentId,
             limit = 1000,
             desc = desc
-        ) ?: throw JwtException("Invalid JWT")
-        emitAll(result.rows.asFlow())
+        ).successBody()
+        emitAll(result.rows.map(healthcarePartyMapper::map).asFlow())
         if(result.nextKeyPair?.startKeyDocId != null) {
             emitAll(
                 findHealthcarePartiesByNameRecursive(
                     name,
                     desc,
-                    result.nextKeyPair?.startKey as? String,
+                    result.nextKeyPair?.startKey,
                     result.nextKeyPair?.startKeyDocId
                 )
             )
@@ -169,66 +184,36 @@ class HealthcarePartyLogicBridge(
     }
 
     override fun listHealthcarePartiesByName(name: String): Flow<HealthcareParty> = flow {
-        emitAll(
-            findHealthcarePartiesByNameRecursive(name).map(healthcarePartyMapper::map)
-        )
+        emitAll(findHealthcarePartiesByNameRecursive(name))
     }
 
-    private fun findHealthcarePartiesBySsinOrNihiiRecursive(
-        query: String,
-        startKey: String? = null,
-        startDocumentId: String? = null
-    ) : Flow<HealthcarePartyDto> = flow {
-        val result = getApi()?.findHealthcarePartiesBySsinOrNihii(
-            searchValue = query,
-            startKey = startKey,
-            startDocumentId = startDocumentId,
-            limit = 1000,
-            desc = false
-        ) ?: throw JwtException("Invalid JWT")
-        emitAll(result.rows.asFlow())
-        if(result.nextKeyPair?.startKeyDocId != null) {
-            emitAll(
-                findHealthcarePartiesBySsinOrNihiiRecursive(
-                    query,
-                    result.nextKeyPair?.startKey as? String,
-                    result.nextKeyPair?.startKeyDocId
-                )
+    // Note: the batch size is intentionally small because in all the usages of this function only the first
+    // result is taken, so there is no need to have a bigger batch size.
+    @OptIn(InternalIcureApi::class)
+    private fun listHealthcarePartiesBySsinOrNihii(query: String, filter: (SdkHealthcareParty) -> Boolean): Flow<HealthcareParty> = flow {
+        val api = getApi()
+        val hcpIds = api.matchHealthcarePartiesBy(HealthcarePartyByNationalIdentifierFilter(query)).successBody()
+
+        hcpIds.chunked(50).forEach { batch ->
+            emitAll(api
+                .getHealthcareParties(ListOfIds(batch))
+                .successBody()
+                .filter(filter)
+                .map(healthcarePartyMapper::map)
+                .asFlow()
             )
         }
     }
 
-    override fun listHealthcarePartiesBySsin(ssin: String): Flow<HealthcareParty> = flow {
-        emitAll(
-            findHealthcarePartiesBySsinOrNihiiRecursive(ssin)
-                .filter { it.ssin == ssin }
-                .map(healthcarePartyMapper::map)
-        )
-    }
 
-    override fun listHealthcarePartiesByNihii(nihii: String): Flow<HealthcareParty> = flow {
-        emitAll(
-            findHealthcarePartiesBySsinOrNihiiRecursive(nihii)
-                .filter { it.nihii == nihii }
-                .map(healthcarePartyMapper::map)
-        )
-    }
+    override fun listHealthcarePartiesBySsin(ssin: String): Flow<HealthcareParty> =
+        listHealthcarePartiesBySsinOrNihii(ssin) { it.ssin == ssin }
 
-    override fun listHealthcarePartyIdsByCode(codeType: String, codeCode: String?): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listHealthcarePartyIdsByIdentifiers(hcpIdentifiers: List<Identifier>): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listHealthcarePartyIdsByName(name: String, desc: Boolean): Flow<String> {
-        throw BridgeException()
-    }
-
-    override fun listHealthcarePartyIdsByTag(tagType: String, tagCode: String?): Flow<String> {
-        throw BridgeException()
-    }
+    // Note: the batch size is intentionally small because in all the usages of this function only the first
+    // result is taken, so there is no need to have a bigger batch size.
+    @OptIn(InternalIcureApi::class)
+    override fun listHealthcarePartiesByNihii(nihii: String): Flow<HealthcareParty> =
+        listHealthcarePartiesBySsinOrNihii(nihii) { it.nihii == nihii }
 
     override suspend fun modifyHealthcareParty(healthcareParty: HealthcareParty): HealthcareParty? {
         throw BridgeException()

@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
 import org.springframework.security.access.AccessDeniedException
+import org.taktik.icure.asynclogic.bridge.mappers.FormTemplateMapper
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.FormTemplate
 import org.taktik.icure.entities.base.CodeStub
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.FormTemplateV2MapperImpl
 import org.taktik.icure.test.BaseKmehrTest
 import org.taktik.icure.test.KmehrTestApplication
 import org.taktik.icure.test.UserCredentials
@@ -23,7 +23,7 @@ import org.taktik.icure.test.withAuthenticatedReactorContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FormTemplateLogicBridgeTest(
     val bridgeConfig: BridgeConfig,
-    val formTemplateMapper: FormTemplateV2MapperImpl,
+    val formTemplateMapper: FormTemplateMapper,
     val jwtUtils: JwtUtils
 ) : BaseKmehrTest() {
 

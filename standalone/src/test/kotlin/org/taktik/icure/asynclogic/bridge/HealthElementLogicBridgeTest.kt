@@ -11,18 +11,18 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
+import org.taktik.icure.asynclogic.bridge.mappers.HealthElementMapper
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.HealthElement
 import org.taktik.icure.entities.embed.Delegation
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.HealthElementV2MapperImpl
 import org.taktik.icure.test.*
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HealthElementLogicBridgeTest(
     val bridgeConfig: BridgeConfig,
-    val heMapper: HealthElementV2MapperImpl,
+    val heMapper: HealthElementMapper,
     val jwtUtils: JwtUtils
 ) : BaseKmehrTest() {
 

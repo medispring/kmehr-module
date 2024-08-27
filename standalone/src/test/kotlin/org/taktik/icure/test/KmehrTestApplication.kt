@@ -1,17 +1,23 @@
 package org.taktik.icure.test
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.icure.sdk.api.raw.impl.RawGroupApiImpl
+import com.icure.sdk.api.raw.impl.RawHealthcarePartyApiImpl
+import com.icure.sdk.api.raw.impl.RawPermissionApiImpl
+import com.icure.sdk.api.raw.impl.RawUserApiImpl
+import com.icure.sdk.model.DatabaseInitialisation
+import com.icure.sdk.model.HealthcareParty
+import com.icure.sdk.model.User
+import com.icure.sdk.model.embed.GroupType
+import com.icure.sdk.model.security.AlwaysPermissionItem
+import com.icure.sdk.model.security.Permission
+import com.icure.sdk.model.security.PermissionType
+import com.icure.sdk.utils.InternalIcureApi
+import com.icure.sdk.utils.Serialization
 import com.icure.test.setup.ICureTestSetup
-import io.icure.kraken.client.apis.GroupApi
-import io.icure.kraken.client.apis.HealthcarePartyApi
-import io.icure.kraken.client.apis.PermissionApi
-import io.icure.kraken.client.apis.UserApi
-import io.icure.kraken.client.security.BasicAuthProvider
-import io.icure.kraken.client.security.JWTProvider
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -24,21 +30,14 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.PropertySource
 import org.taktik.icure.asyncdao.InternalDAO
+import org.taktik.icure.asynclogic.bridge.mappers.UserMapper
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.UserType
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.dto.DatabaseInitialisationDto
-import org.taktik.icure.services.external.rest.v2.dto.HealthcarePartyDto
-import org.taktik.icure.services.external.rest.v2.dto.UserDto
-import org.taktik.icure.services.external.rest.v2.dto.security.AlwaysPermissionItemDto
-import org.taktik.icure.services.external.rest.v2.dto.security.PermissionDto
-import org.taktik.icure.services.external.rest.v2.dto.security.PermissionTypeDto
-import org.taktik.icure.services.external.rest.v2.mapper.UnsecureUserV2MapperImpl
 import org.taktik.icure.test.fake.components.FakeBridgeCredentialsManager
 import java.io.File
 
-@OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
 @SpringBootApplication(
     scanBasePackages = [
         "org.springframework.boot.autoconfigure.aop",
@@ -82,52 +81,74 @@ class KmehrTestApplication {
     private val composeDir = "src/test/resources/docker"
     private val krakenCompose = System.getenv("KRAKEN_COMPOSE") ?: "file://$composeDir/docker-compose-cloud.yaml"
 
+    @OptIn(InternalIcureApi::class)
     @Bean
     fun performStartupTasks(
         bridgeConfig: BridgeConfig,
         jwtUtils: JwtUtils,
         objectMapper: ObjectMapper,
-        userMapper: UnsecureUserV2MapperImpl,
+        userMapper: UserMapper,
         internalDaos: List<InternalDAO<*>>
     ) = ApplicationRunner {
         runBlocking {
             ICureTestSetup.startKrakenEnvironment(krakenCompose, emptyList(), composeDir)
             ICureTestSetup.bootstrapCloud("xx", "xx", uuid(), "john", couchDbUser = "icure", couchDbPassword = "icure", rootUserRoles = defaultRoles) //pragma: allowlist secret
             loadRolesInConfig()
-            val groupApi = GroupApi(basePath = baseICurePath, authProvider = BasicAuthProvider("john", "LetMeIn"))
-            val userApi = UserApi(basePath = baseICurePath, authProvider = BasicAuthProvider("john", "LetMeIn"))
-            val hcpApi = HealthcarePartyApi(basePath = baseICurePath, authProvider = BasicAuthProvider("john", "LetMeIn"))
+            val authProvider = getAuthProvider(baseICurePath, "john", "LetMeIn")
+            val groupApi = RawGroupApiImpl(
+                apiUrl = baseICurePath,
+                authProvider = authProvider,
+                httpClient = testHttpClient,
+                json = Serialization.json
+            )
+            val userApi = RawUserApiImpl(
+                apiUrl = baseICurePath,
+                authProvider = authProvider,
+                httpClient = testHttpClient,
+                json = Serialization.json
+            )
+            val hcpApi = RawHealthcarePartyApiImpl(
+                apiUrl = baseICurePath,
+                authProvider = authProvider,
+                httpClient = testHttpClient,
+                json = Serialization.json
+            )
 
-            val testGroupId = groupApi.listGroups().firstOrNull{ it.id.startsWith("e2e-test") }?.id
+            val testGroupId = groupApi.listGroups().successBody().firstOrNull{ it.id.startsWith("e2e-test") }?.id
                 ?: "e2e-test-${uuid().subSequence(0,6)}".also {
                     groupApi.createGroup(
-                        it,
-                        "test",
-                        uuid(),
-                        DatabaseInitialisationDto(null, null, null, null),
-                        null, null, null, null)
+                        id = it,
+                        name = "test",
+                        type = null,
+                        password = uuid(),
+                        server = null,
+                        q = null,
+                        superGroup = null,
+                        applicationId = null,
+                        initialisationData = DatabaseInitialisation(null, null, null, null),
+                    ).successBody()
                 }
 
             val createdHcp = hcpApi.createHealthcarePartyInGroup(
                 testGroupId,
-                HealthcarePartyDto(
+                HealthcareParty(
                     uuid(),
                     name = "Mr. Darcy"
                 )
-            )
+            ).successBody()
 
             val userLogin = generateEmail()
             val userPwd = uuid()
             val createdUser = userApi.createUserInGroup(
                 testGroupId,
-                UserDto(
+                User(
                     uuid(),
                     login = userLogin,
                     email = userLogin,
                     passwordHash = userPwd,
                     healthcarePartyId = createdHcp.id
                 )
-            )
+            ).successBody()
 
             assignAdminPermissionToUser(testGroupId, createdUser.id)
             checkIfUserIsAvailable(userLogin, userPwd)
@@ -147,21 +168,34 @@ class KmehrTestApplication {
         }
     }
 
+    @OptIn(InternalIcureApi::class)
     private suspend fun checkIfUserIsAvailable(username: String, password: String) = flow<Unit> {
-        UserApi(baseICurePath, authProvider = BasicAuthProvider(username, password)).getCurrentUser()
+        val authProvider = getAuthProvider(baseICurePath, username, password)
+        RawUserApiImpl(
+            apiUrl = baseICurePath,
+            authProvider = authProvider,
+            httpClient = testHttpClient,
+            json = Serialization.json
+        ).getCurrentUser().successBody()
     }.retry(5) {
         delay(2_000)
         true
     }.collect()
 
+    @OptIn(InternalIcureApi::class)
     private suspend fun assignAdminPermissionToUser(groupId: String, userId: String) = flow<Unit> {
-        PermissionApi(basePath = baseICurePath, authProvider = JWTProvider(baseICurePath, "john", "LetMeIn"))
-            .modifyUserPermissions(
+        val authProvider = getAuthProvider(baseICurePath, "john", "LetMeIn")
+        RawPermissionApiImpl(
+            apiUrl = baseICurePath,
+            authProvider = authProvider,
+            httpClient = testHttpClient,
+            json = Serialization.json
+        ).modifyUserPermissions(
                 "$groupId:$userId",
-                PermissionDto(
+                Permission(
                     grants = setOf(
-                        AlwaysPermissionItemDto(
-                            PermissionTypeDto.ADMIN
+                        AlwaysPermissionItem(
+                            PermissionType.Admin
                         )
                     )
                 )
@@ -182,9 +216,9 @@ class KmehrTestApplication {
     }
 
     private val defaultRoles = mapOf(
-        UserType.PATIENT.name to "BASIC_USER\", \"BASIC_DATA_OWNER",
-        UserType.HCP.name to "BASIC_USER\", \"BASIC_DATA_OWNER\", \"PATIENT_USER_MANAGER\", \"LEGACY_HCP",
-        UserType.DEVICE.name to "BASIC_USER\", \"BASIC_DATA_OWNER",
-        UserType.USER.name to "BASIC_USER"
+        UserType.PATIENT.name to listOf("BASIC_USER", "BASIC_DATA_OWNER"),
+        UserType.HCP.name to listOf("BASIC_USER", "BASIC_DATA_OWNER", "PATIENT_USER_MANAGER", "LEGACY_HCP"),
+        UserType.DEVICE.name to listOf("BASIC_USER", "BASIC_DATA_OWNER"),
+        UserType.USER.name to listOf("BASIC_USER")
     )
 }

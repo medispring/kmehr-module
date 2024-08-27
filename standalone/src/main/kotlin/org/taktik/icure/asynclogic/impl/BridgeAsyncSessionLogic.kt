@@ -3,6 +3,7 @@ package org.taktik.icure.asynclogic.impl
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.icure.sdk.model.LoginCredentials
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -33,7 +34,6 @@ import org.taktik.icure.security.KmehrJWTDetails
 import org.taktik.icure.security.jwt.EncodedJWTAuth
 import org.taktik.icure.security.jwt.JwtUtils
 import org.taktik.icure.security.loadSecurityContext
-import org.taktik.icure.services.external.rest.v2.dto.LoginCredentials
 import java.io.Serializable
 
 @Service
@@ -120,6 +120,10 @@ class BridgeAsyncSessionLogic(
             ?: throw ForbiddenRequestException("Current user is not an Healthcare Party")
 
     override suspend fun getSearchKeyMatcher(): (String, HasEncryptionMetadata) -> Boolean {
+        throw BridgeException()
+    }
+
+    override suspend fun getAllSearchKeysIfCurrentDataOwner(dataOwnerId: String): Set<String> {
         throw BridgeException()
     }
 

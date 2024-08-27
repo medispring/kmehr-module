@@ -5,10 +5,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
+import org.taktik.icure.asynclogic.bridge.mappers.CodeMapper
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.base.Code
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.base.CodeV2MapperImpl
 import org.taktik.icure.test.BaseKmehrTest
 import org.taktik.icure.test.KmehrTestApplication
 import org.taktik.icure.test.UserCredentials
@@ -19,7 +19,7 @@ import org.taktik.icure.test.withAuthenticatedReactorContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CodeLogicBridgeTest(
     val bridgeConfig: BridgeConfig,
-    val codeMapper: CodeV2MapperImpl,
+    val codeMapper: CodeMapper,
     val jwtUtils: JwtUtils
 ) : BaseKmehrTest() {
 

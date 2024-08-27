@@ -3,7 +3,7 @@ package org.taktik.icure.errors
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.icure.kraken.client.infrastructure.ClientException
+import com.icure.sdk.utils.RequestStatusException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono
 import java.io.IOException
 
 @Configuration
-open class GlobalErrorHandler : ErrorWebExceptionHandler {
+class GlobalErrorHandler : ErrorWebExceptionHandler {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
     private val objectMapper = ObjectMapper().registerKotlinModule()
@@ -37,7 +37,7 @@ open class GlobalErrorHandler : ErrorWebExceptionHandler {
         r.writeWith(
             Mono.just(
                 when (ex) {
-                    is ClientException -> bufferFactory.toBuffer(ex.message).also {
+                    is RequestStatusException -> bufferFactory.toBuffer(ex.message).also {
                         when(ex.statusCode) {
                             401 -> r.statusCode = HttpStatus.UNAUTHORIZED
                             403 -> r.statusCode = HttpStatus.FORBIDDEN

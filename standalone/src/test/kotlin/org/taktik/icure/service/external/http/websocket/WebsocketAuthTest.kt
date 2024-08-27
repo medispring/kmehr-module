@@ -2,6 +2,7 @@ package org.taktik.icure.service.external.http.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.icure.sdk.model.LoginCredentials
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.ktor.client.*
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.taktik.icure.asynclogic.impl.JwtResponse
 import org.taktik.icure.config.BridgeConfig
-import org.taktik.icure.services.external.rest.v2.dto.LoginCredentials
 import org.taktik.icure.test.BaseKmehrTest
 import org.taktik.icure.test.KmehrTestApplication
 import org.taktik.icure.test.getAuthJWT

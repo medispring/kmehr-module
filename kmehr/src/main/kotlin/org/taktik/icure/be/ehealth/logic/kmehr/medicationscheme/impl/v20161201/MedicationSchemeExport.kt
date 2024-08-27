@@ -19,6 +19,7 @@ import org.taktik.icure.be.ehealth.logic.kmehr.Config
 import org.taktik.icure.be.ehealth.logic.kmehr.emitMessage
 import org.taktik.icure.be.ehealth.logic.kmehr.v20161201.KmehrExport
 import org.taktik.icure.config.KmehrConfiguration
+import org.taktik.icure.domain.filter.impl.service.ServiceByHcPartyTagCodeDateFilter
 import org.taktik.icure.entities.HealthcareParty
 import org.taktik.icure.entities.Patient
 import org.taktik.icure.entities.embed.Service
@@ -388,7 +389,14 @@ class MedicationSchemeExport(
 
         val services = hcPartyIds.flatMap { hcpId ->
             cdItems.flatMap { cd ->
-                contactLogic.listServiceIdsByTag(hcpId, sfks, "CD-ITEM", cd, null, null).toList()
+                contactLogic.matchEntitiesBy(
+                    ServiceByHcPartyTagCodeDateFilter(
+                        healthcarePartyId = hcpId,
+                        patientSecretForeignKeys = sfks,
+                        tagType = "CD-ITEM",
+                        tagCode = cd
+                    )
+                ).toList()
             }
         }.let {
             contactLogic.getServices(it)

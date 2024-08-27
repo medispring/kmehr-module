@@ -1,13 +1,20 @@
 [versions]
-ktor = "2.2.3"
+ktor = "3.0.0-beta-1"
 
 [libraries]
 commonsCodec = { group = "commons-codec", name = "commons-codec", version = "1.15"}
 mustacheJava = { group = "com.github.spullara.mustache.java", name = "compiler", version = "0.9.10" }
-ktorNegotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
-icureKotlinSDK = { group = "io.icure", name = "icure-reactive-kotlin-client", version = "0.1.491-g670dc3a3a8" }
-icureTestStack = { group = "io.icure", name = "icure-e2e-test-setup", version = "0.0.24-gc854bb2431" }
+icureKotlinSDK = { group = "com.icure", name = "icure-sdk", version = "0.2.42" }
+icureTestStack = { group = "io.icure", name = "icure-e2e-test-setup", version = "0.0.26-g52fadd5a79" }
 ajaltClikt = { group = "com.github.ajalt", name = "clikt", version = "2.8.0" }
 credentialsRotation = { group = "com.icure", name = "credentials-rotation", version = "0.0.4-gcfc84d62bd" }
 jaxbApi = { group = "javax.xml.bind", name = "jaxb-api", version = "2.3.1" }
 jaxbRuntime = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "2.3.8" }
+ktorClientCore = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktorClientCio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktorClientContentNegotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktorClientWebSocket = { group = "io.ktor", name = "ktor-client-websockets", version.ref = "ktor" }
+ktorSerialization = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+[bundles]
+ktorClientLibs = ["ktorClientCore", "ktorClientCio", "ktorClientContentNegotiation", "ktorClientWebSocket", "ktorSerialization"]

@@ -1,32 +1,39 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.apis.InsuranceApi
-import io.icure.kraken.client.security.ExternalJWTProvider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.icure.sdk.api.raw.impl.RawInsuranceApiImpl
+import com.icure.sdk.api.raw.successBodyOrNull404
+import com.icure.sdk.utils.InternalIcureApi
+import com.icure.sdk.utils.Serialization
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 import org.taktik.couchdb.DocIdentifier
 import org.taktik.icure.asynclogic.InsuranceLogic
+import org.taktik.icure.asynclogic.bridge.auth.KmehrAuthProvider
+import org.taktik.icure.asynclogic.bridge.mappers.InsuranceMapper
 import org.taktik.icure.asynclogic.impl.BridgeAsyncSessionLogic
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.db.PaginationOffset
 import org.taktik.icure.entities.Insurance
-import org.taktik.icure.entities.utils.ExternalFilterKey
+import org.taktik.icure.errors.UnauthorizedException
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.pagination.PaginationElement
-import org.taktik.icure.services.external.rest.v2.mapper.InsuranceV2Mapper
 
-@OptIn(ExperimentalStdlibApi::class, ExperimentalCoroutinesApi::class)
 @Service
 class InsuranceLogicBridge(
     val asyncSessionLogic: BridgeAsyncSessionLogic,
     val bridgeConfig: BridgeConfig,
-    private val insuranceMapper: InsuranceV2Mapper
+    private val insuranceMapper: InsuranceMapper
 ) : GenericLogicBridge<Insurance>(), InsuranceLogic {
 
-    private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let {
-        InsuranceApi(basePath = bridgeConfig.iCureUrl, authProvider = ExternalJWTProvider(it))
-    }
+    @OptIn(InternalIcureApi::class)
+    private suspend fun getApi() = asyncSessionLogic.getCurrentJWT()?.let { token ->
+        RawInsuranceApiImpl(
+            apiUrl = bridgeConfig.iCureUrl,
+            authProvider = KmehrAuthProvider(token),
+            httpClient = bridgeHttpClient,
+            json = Serialization.json
+        )
+    } ?: throw UnauthorizedException("You must be logged in to perform this operation")
 
     override suspend fun createInsurance(insurance: Insurance): Insurance? {
         throw BridgeException()
@@ -40,10 +47,10 @@ class InsuranceLogicBridge(
         throw BridgeException()
     }
 
+    @OptIn(InternalIcureApi::class)
     override suspend fun getInsurance(insuranceId: String): Insurance? =
-        getApi()?.getInsurance(insuranceId)?.let {
-            insuranceMapper.map(it)
-        }
+        getApi().getInsurance(insuranceId).successBodyOrNull404()?.let(insuranceMapper::map)
+
 
     override fun getInsurances(ids: Set<String>): Flow<Insurance> {
         throw BridgeException()
