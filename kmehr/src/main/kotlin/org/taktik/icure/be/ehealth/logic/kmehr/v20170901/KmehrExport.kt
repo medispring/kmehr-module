@@ -163,7 +163,7 @@ open class KmehrExport(
                 }
             )
 
-            if (this.cds.filter { it.s == CDHCPARTYschemes.CD_HCPARTY }.any { it.value.startsWith("pers") }) {
+            if (this.cds.filter { it.s == CDHCPARTYschemes.CD_HCPARTY && !it.value.isNullOrEmpty() }.any { it.value.startsWith("pers") }) {
                 firstname = m.firstName
                 familyname = m.lastName
             } else {
