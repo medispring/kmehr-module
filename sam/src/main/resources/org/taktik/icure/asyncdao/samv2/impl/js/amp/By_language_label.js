@@ -1,8 +1,11 @@
 map = function(doc) {
     var normalize_substrings = function(text,latin_map) {
-        return text.trim().split(/[ |/]+/).map(function(word) {
-            return word.toLowerCase().replace(/[^A-Za-z0-9]/g,function(a){return latin_map[a]||""});
+        var acc = [];
+        text.trim().split(/[ |/]+/).forEach(function(word) {
+            var normalized = word.toLowerCase().replace(/[^A-Za-z0-9-]/g,function(a){return latin_map[a]||""});
+            (normalized.includes("-") ? [normalized, normalized.replace('-','')].concat(normalized.split('-')) : [normalized]).filter((x) => x !== '-').forEach((x) => acc.push(x));
         });
+        return acc;
     };
 
     if (doc.java_type === 'org.taktik.icure.entities.samv2.Amp' && !doc.deleted) {

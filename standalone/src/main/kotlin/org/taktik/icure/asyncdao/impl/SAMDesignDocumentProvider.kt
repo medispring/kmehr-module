@@ -6,7 +6,7 @@ import org.taktik.couchdb.Client
 import org.taktik.couchdb.dao.DesignDocumentProvider
 import org.taktik.couchdb.dao.designDocName
 import org.taktik.couchdb.entity.DesignDocument
-import org.taktik.couchdb.support.StdDesignDocumentFactory
+import org.taktik.couchdb.support.DesignDocumentFactory
 import org.taktik.icure.asyncdao.Partitions
 
 @Profile("sam")
@@ -27,11 +27,19 @@ class SAMDesignDocumentProvider : DesignDocumentProvider {
         metaDataSource: Any,
         client: Client?, partition: Partitions, ignoreIfUnchanged: Boolean
     ): Set<DesignDocument> =
-        StdDesignDocumentFactory().generateFrom(
+        DesignDocumentFactory.getStdDesignDocumentFactory().generateFrom(
             baseDesignDocumentId(entityClass),
             metaDataSource,
             useVersioning = false
         )
+
+    override suspend fun generateExternalDesignDocuments(
+        entityClass: Class<*>,
+        partitionsWithRepo: Map<String, String>,
+        client: Client?,
+        ignoreIfUnchanged: Boolean
+    ): Set<DesignDocument> = emptySet() // We don't need to generate external design documents in SAM
+
 
     override suspend fun currentDesignDocumentId(
         entityClass: Class<*>,

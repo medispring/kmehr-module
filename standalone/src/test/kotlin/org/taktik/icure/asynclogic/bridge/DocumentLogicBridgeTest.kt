@@ -1,6 +1,6 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.infrastructure.ClientException
+import com.icure.sdk.utils.RequestStatusException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
+import org.taktik.icure.asynclogic.bridge.mappers.DocumentMapper
 import org.taktik.icure.asynclogic.objectstorage.DataAttachmentChange
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.Document
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.DocumentV2MapperImpl
 import org.taktik.icure.test.BaseKmehrTest
 import org.taktik.icure.test.KmehrTestApplication
 import org.taktik.icure.test.UserCredentials
@@ -30,7 +30,7 @@ import java.nio.charset.Charset
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DocumentLogicBridgeTest(
     val bridgeConfig: BridgeConfig,
-    val documentMapper: DocumentV2MapperImpl,
+    val documentMapper: DocumentMapper,
     val jwtUtils: JwtUtils
 ) : BaseKmehrTest() {
 
@@ -89,7 +89,7 @@ private fun StringSpec.documentLogicBridgeTest(
 
     "Trying to get a Document that does not exist will result in a 404" {
         withAuthenticatedReactorContext(credentials) {
-            shouldThrow<ClientException> { documentBridge.getDocument(uuid()) }.also {
+            shouldThrow<RequestStatusException> { documentBridge.getDocument(uuid()) }.also {
                 it.statusCode shouldBe 404
             }
         }
@@ -147,7 +147,6 @@ private fun StringSpec.documentLogicBridgeTest(
             documentBridge.getMainAttachment(document.id).toList().shouldBeEmpty()
         }
     }
-
 
     "Trying to update the attachments of a Document without a rev will result in an error" {
         withAuthenticatedReactorContext(credentials) {

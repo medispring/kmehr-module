@@ -24,12 +24,21 @@ steps:
       entrypoint: 'sh'
       args: [ '-c', 'docker build --builder multiarch --progress=plain -f package.Dockerfile --push --platform linux/amd64,linux/arm64 -t docker.taktik.be/icure/icure-kmehr-module:latest -t docker.taktik.be/icure/icure-kmehr-module:$(cat ./git.version) --build-arg "version=$(cat ./git.version)" .' ]
 
+  -   name: 'docker:24-git'
+      entrypoint: 'sh'
+      args: [ '-c', 'docker build -f update.Dockerfile --build-arg="version=$(cat ./git.version)" --build-arg="gitUser=$$GIT_USERNAME" --build-arg="gitPwd=$$GIT_PASSWORD" -t ci:test .' ]
+      secretEnv: [ 'GIT_USERNAME', 'GIT_PASSWORD' ]
+
 availableSecrets:
   secretManager:
     - versionName: projects/taktik-dev/secrets/ci-repo-username/versions/1
       env: 'REPO_USERNAME'
     - versionName: projects/taktik-dev/secrets/ci-repo-password/versions/1
       env: 'REPO_PASSWORD'
+    - versionName: projects/taktik-dev/secrets/ci-git-username/versions/1
+      env: 'GIT_USERNAME'
+    - versionName: projects/taktik-dev/secrets/ci-git-password/versions/1
+      env: 'GIT_PASSWORD'
 
 options:
   pool:

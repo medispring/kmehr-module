@@ -9,6 +9,8 @@ import org.taktik.icure.be.ehealth.dto.kmehr.v20170601.be.fgov.ehealth.standards
 import org.taktik.icure.be.ehealth.dto.kmehr.v20170601.be.fgov.ehealth.standards.kmehr.dt.v1.TextType
 import org.taktik.icure.be.ehealth.dto.kmehr.v20170601.be.fgov.ehealth.standards.kmehr.id.v1.IDKMEHR
 import org.taktik.icure.be.ehealth.dto.kmehr.v20170601.be.fgov.ehealth.standards.kmehr.id.v1.IDKMEHRschemes
+import org.taktik.icure.be.ehealth.dto.kmehr.v20170601.be.fgov.ehealth.standards.kmehr.id.v1.IDPATIENT
+import org.taktik.icure.be.ehealth.dto.kmehr.v20170601.be.fgov.ehealth.standards.kmehr.id.v1.IDPATIENTschemes
 import org.taktik.icure.be.ehealth.dto.kmehr.v20170601.be.fgov.ehealth.standards.kmehr.schema.v1.*
 import org.taktik.icure.be.ehealth.logic.kmehr.Config
 import org.taktik.icure.be.ehealth.logic.kmehr.emitMessage
@@ -342,6 +344,12 @@ class IncapacityExport(
                                     contents.add(
                                         ContentType().apply {
                                             person = PersonType().apply {
+                                                //NOTE: Mult-eMediatt only requires the phone number of the contact person and no other data.
+                                                //But kmehr requires name/id/sex so dummy values are given here
+                                                ids.add(IDPATIENT().apply { s = IDPATIENTschemes.LOCAL; sv = config.soft?.version; sl = "${config.soft?.name}-Person-Id"; value = "cp" })
+                                                firstnames.add("dummyname")
+                                                familyname = "dummyname"
+                                                sex = SexType().apply { cd = CDSEX().apply { s = "CD-SEX"; sv = "1.1"; value = CDSEXvalues.UNKNOWN } }
                                                 telecoms.add(
                                                     TelecomType().apply {
                                                         cds.add(CDTELECOM().apply { s(CDTELECOMschemes.CD_TELECOM); value = "phone" })

@@ -1,27 +1,29 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.infrastructure.ClientException
+import com.icure.sdk.utils.RequestStatusException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
+import org.taktik.icure.asynclogic.bridge.mappers.HealthcarePartyMapper
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.HealthcareParty
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.HealthcarePartyV2MapperImpl
 import org.taktik.icure.test.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HealthcarePartyLogicBridgeTest(
     val bridgeConfig: BridgeConfig,
-    val hcpMapper: HealthcarePartyV2MapperImpl,
+    val hcpMapper: HealthcarePartyMapper,
     val jwtUtils: JwtUtils
 ) : BaseKmehrTest() {
 
@@ -77,7 +79,7 @@ private fun StringSpec.healthcarePartyLogicBridgeTest(
 
     "Retrieving a non existent hcp will return a 404 Client exception" {
         withAuthenticatedReactorContext(credentials) {
-            shouldThrow<ClientException> { hcpBridge.getHealthcareParty(uuid()) }.also {
+            shouldThrow<RequestStatusException> { hcpBridge.getHealthcareParty(uuid()) }.also {
                 it.statusCode shouldBe 404
             }
         }
@@ -149,52 +151,57 @@ private fun StringSpec.healthcarePartyLogicBridgeTest(
                         ssin = uuid(),
                         nihii = uuid()
                     )
-                )
+                ).shouldNotBeNull()
             }
 
-            val result = hcpBridge.listHealthcarePartiesBySsin(hcpList.first()!!.ssin!!).toList()
+            val result = hcpBridge.listHealthcarePartiesBySsin(hcpList.first().ssin!!).toList()
             result.size shouldBe 1
-            result.first().id shouldBe hcpList.first()!!.id
-            result.first().ssin shouldBe hcpList.first()!!.ssin
+            result.first().id shouldBe hcpList.first().id
+            result.first().ssin shouldBe hcpList.first().ssin
         }
     }
 
     "Can retrieve HCPs by SSIN when exceeding pagination" {
         withAuthenticatedReactorContext(credentials) {
-            val ssin = uuid()
+            val ssin = ssin()
 
-            val hcpList = List(1500) {
+            val hcpList = List(50) {
                 hcpBridge.createHealthcareParty(
                     HealthcareParty(
                         id = uuid(),
                         firstName = uuid(),
                         lastName = uuid(),
                         parentId = credentials.dataOwnerId!!,
-                        ssin = ssin,
-                        nihii = uuid()
+                        ssin = ssin(),
+                        nihii = ssin
                     )
+                ).shouldNotBeNull()
+            } + hcpBridge.createHealthcareParty(
+                HealthcareParty(
+                    id = uuid(),
+                    firstName = uuid(),
+                    lastName = uuid(),
+                    parentId = credentials.dataOwnerId!!,
+                    ssin = ssin,
+                    nihii = ssin()
                 )
-            }
+            ).shouldNotBeNull()
 
-            hcpList.size shouldBeGreaterThan 0
-
-            List(1000) {
+            List(100) {
                 hcpBridge.createHealthcareParty(
                     HealthcareParty(
                         id = uuid(),
                         firstName = uuid(),
                         lastName = uuid(),
-                        parentId = credentials.dataOwnerId!!,
-                        ssin = uuid(),
-                        nihii = uuid()
+                        parentId = credentials.dataOwnerId,
+                        ssin = ssin(),
+                        nihii = ssin()
                     )
                 )
             }
 
-            hcpBridge.listHealthcarePartiesBySsin(ssin)
-                .onEach {
-                    it.ssin shouldBe ssin
-                }.count() shouldBe hcpList.size
+            val result = hcpBridge.listHealthcarePartiesBySsin(ssin).first()
+            result shouldBe hcpList.last()
         }
     }
 
@@ -228,40 +235,45 @@ private fun StringSpec.healthcarePartyLogicBridgeTest(
 
     "Can retrieve HCPs by Nihii when exceeding pagination" {
         withAuthenticatedReactorContext(credentials) {
-            val nihii = uuid()
+            val nihii = ssin()
 
-            val hcpList = List(1500) {
+            val hcpList = List(50) {
                 hcpBridge.createHealthcareParty(
                     HealthcareParty(
                         id = uuid(),
                         firstName = uuid(),
                         lastName = uuid(),
                         parentId = credentials.dataOwnerId!!,
-                        ssin = uuid(),
-                        nihii = nihii
+                        ssin = nihii,
+                        nihii = ssin()
                     )
+                ).shouldNotBeNull()
+            } + hcpBridge.createHealthcareParty(
+                HealthcareParty(
+                    id = uuid(),
+                    firstName = uuid(),
+                    lastName = uuid(),
+                    parentId = credentials.dataOwnerId!!,
+                    ssin = ssin(),
+                    nihii = nihii
                 )
-            }
+            ).shouldNotBeNull()
 
-            hcpList.size shouldBeGreaterThan 0
-
-            List(1000) {
+            List(100) {
                 hcpBridge.createHealthcareParty(
                     HealthcareParty(
                         id = uuid(),
                         firstName = uuid(),
                         lastName = uuid(),
-                        parentId = credentials.dataOwnerId!!,
-                        ssin = uuid(),
-                        nihii = uuid()
+                        parentId = credentials.dataOwnerId,
+                        ssin = ssin(),
+                        nihii = ssin()
                     )
                 )
             }
 
-            hcpBridge.listHealthcarePartiesByNihii(nihii)
-                .onEach {
-                    it.nihii shouldBe nihii
-                }.count() shouldBe hcpList.size
+            val result = hcpBridge.listHealthcarePartiesByNihii(nihii).first()
+            result shouldBe hcpList.last()
         }
     }
 

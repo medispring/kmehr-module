@@ -3,16 +3,19 @@ package org.taktik.icure.asynclogic.impl
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
+import com.icure.sdk.model.LoginCredentials
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.slf4j.LoggerFactory
-import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Service
@@ -22,7 +25,6 @@ import org.taktik.icure.asynclogic.SessionInformationProvider
 import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.constants.Roles
 import org.taktik.icure.entities.DataOwnerType
-import org.taktik.icure.entities.base.Encryptable
 import org.taktik.icure.entities.base.HasEncryptionMetadata
 import org.taktik.icure.exceptions.BridgeException
 import org.taktik.icure.exceptions.ForbiddenRequestException
@@ -32,7 +34,6 @@ import org.taktik.icure.security.KmehrJWTDetails
 import org.taktik.icure.security.jwt.EncodedJWTAuth
 import org.taktik.icure.security.jwt.JwtUtils
 import org.taktik.icure.security.loadSecurityContext
-import org.taktik.icure.services.external.rest.v2.dto.LoginCredentials
 import java.io.Serializable
 
 @Service
@@ -64,7 +65,8 @@ class BridgeAsyncSessionLogic(
         username: String,
         password: String,
         session: WebSession?,
-        groupId: String?
+        groupId: String?,
+        applicationId: String?
     ): Authentication? {
         throw BridgeException()
     }
@@ -118,6 +120,10 @@ class BridgeAsyncSessionLogic(
             ?: throw ForbiddenRequestException("Current user is not an Healthcare Party")
 
     override suspend fun getSearchKeyMatcher(): (String, HasEncryptionMetadata) -> Boolean {
+        throw BridgeException()
+    }
+
+    override suspend fun getAllSearchKeysIfCurrentDataOwner(dataOwnerId: String): Set<String> {
         throw BridgeException()
     }
 

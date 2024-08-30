@@ -20,6 +20,9 @@ import org.taktik.icure.be.ehealth.dto.kmehr.v20161201.Utils
 import org.taktik.icure.be.ehealth.logic.kmehr.validSsinOrNull
 import org.taktik.icure.db.equals
 import org.taktik.icure.db.sanitizeString
+import org.taktik.icure.domain.filter.impl.patient.PatientByHcPartyAndSsinFilter
+import org.taktik.icure.domain.filter.impl.patient.PatientByHcPartyDateOfBirthFilter
+import org.taktik.icure.domain.filter.impl.patient.PatientByHcPartyNameFilter
 import org.taktik.icure.domain.mapping.ImportMapping
 import org.taktik.icure.domain.result.ImportResult
 import org.taktik.icure.entities.Contact
@@ -672,23 +675,33 @@ class SumehrImport(
         v.notNull(niss, "Niss shouldn't be null for patient $p")
 
         return dest ?: niss?.let {
-            patientLogic.listByHcPartyAndSsinIdsOnly(niss, author.healthcarePartyId!!).firstOrNull()
-                ?.let { patientLogic.getPatient(it) }
-            } ?: patientLogic.listByHcPartyDateOfBirthIdsOnly(
-             Utils.makeFuzzyIntFromXMLGregorianCalendar(p.birthdate.date) ?: throw IllegalStateException("Person's date of birth is invalid"),
-              author.healthcarePartyId!!).toList().takeIf { it.isNotEmpty() }?.let {
-                patientLogic.getPatients(it).filter {
-                    p.firstnames.any { fn -> equals(it.firstName, fn) && equals(it.lastName, p.familyname) }
-                }.firstOrNull()
-            } ?: patientLogic.listByHcPartyNameContainsFuzzyIdsOnly(
-                sanitizeString(p.familyname + p.firstnames.first()),
-                author.healthcarePartyId!!).toList().takeIf { it.isNotEmpty() }?.let {
-                    patientLogic.getPatients(it).filter { patient ->
-                        patient.dateOfBirth?.let { dateOfBirth ->
-                            dateOfBirth == Utils.makeFuzzyIntFromXMLGregorianCalendar(p.birthdate.date)
-                        } ?: false
-                    }.firstOrNull()
-            }
+            patientLogic.matchEntitiesBy(
+                PatientByHcPartyAndSsinFilter(
+                    ssin = niss,
+                    healthcarePartyId = checkNotNull(author.healthcarePartyId) { "HealthcareParty id cannot be null"}
+                )
+            ).firstOrNull()?.let { patientLogic.getPatient(it) }
+        } ?: patientLogic.matchEntitiesBy(
+            PatientByHcPartyDateOfBirthFilter(
+                healthcarePartyId = checkNotNull(author.healthcarePartyId) { "HealthcareParty id cannot be null"},
+                dateOfBirth = Utils.makeFuzzyIntFromXMLGregorianCalendar(p.birthdate.date) ?: throw IllegalStateException("Person's date of birth is invalid")
+            )
+        ).toList().takeIf { it.isNotEmpty() }?.let {
+            patientLogic.getPatients(it).filter {
+                p.firstnames.any { fn -> equals(it.firstName, fn) && equals(it.lastName, p.familyname) }
+            }.firstOrNull()
+        } ?: patientLogic.matchEntitiesBy(
+            PatientByHcPartyNameFilter(
+                healthcarePartyId = checkNotNull(author.healthcarePartyId) { "HealthcareParty id cannot be null"},
+                name = sanitizeString(p.familyname + p.firstnames.first())
+            )
+        ).toList().takeIf { it.isNotEmpty() }?.let {
+            patientLogic.getPatients(it).filter { patient ->
+                patient.dateOfBirth?.let { dateOfBirth ->
+                    dateOfBirth == Utils.makeFuzzyIntFromXMLGregorianCalendar(p.birthdate.date)
+                } ?: false
+            }.firstOrNull()
+        }
     }
 
     /**

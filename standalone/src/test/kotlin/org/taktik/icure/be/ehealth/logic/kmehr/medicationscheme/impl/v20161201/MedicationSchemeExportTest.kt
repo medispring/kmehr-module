@@ -2,18 +2,25 @@ package org.taktik.icure.be.ehealth.logic.kmehr.medicationscheme.impl.v20161201
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
 import org.taktik.icure.be.ehealth.dto.kmehr.v20161201.Utils
 import org.taktik.icure.be.ehealth.dto.kmehr.v20161201.be.fgov.ehealth.standards.kmehr.schema.v1.FolderType
 import org.taktik.icure.be.ehealth.logic.kmehr.Config
+import org.taktik.icure.config.BridgeConfig
 import org.taktik.icure.entities.HealthcareParty
 import org.taktik.icure.entities.Patient
 import org.taktik.icure.entities.embed.Content
 import org.taktik.icure.entities.embed.Medication
 import org.taktik.icure.entities.embed.Service
 import org.taktik.icure.entities.embed.Substanceproduct
+import org.taktik.icure.security.jwt.JwtUtils
 import org.taktik.icure.test.BaseKmehrTest
+import org.taktik.icure.test.KmehrTestApplication
+import org.taktik.icure.test.UserCredentials
+import org.taktik.icure.test.createHealthcarePartyUser
 import org.taktik.icure.test.uuid
+import org.taktik.icure.test.withAuthenticatedReactorContext
 import java.time.Instant
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -23,7 +30,9 @@ import kotlin.reflect.jvm.isAccessible
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MedicationSchemeExportTest(
-	private val medicationSchemeExport: MedicationSchemeExport
+	private val bridgeConfig: BridgeConfig,
+	private val medicationSchemeExport: MedicationSchemeExport,
+	private val jwtUtils: JwtUtils
 ) : BaseKmehrTest() {
 
 	private val defaultConfig = Config(
@@ -34,6 +43,14 @@ class MedicationSchemeExportTest(
 		clinicalSummaryType = "",
 		defaultLanguage = "en",
 	)
+	private val hcp: UserCredentials = runBlocking {
+		createHealthcarePartyUser(
+			bridgeConfig.iCureUrl,
+			KmehrTestApplication.masterHcp.login,
+			KmehrTestApplication.masterHcp.password,
+			jwtUtils
+		)
+	}
 
 	init {
 		medicationSchemeExportTest()
@@ -74,35 +91,38 @@ class MedicationSchemeExportTest(
 			folder.transactions.first().version shouldBe "1"
 		}
 
-		"CSM-344 - if the version can be inferred from the services, then the folder version will be version + 1" {
+		"!CSM-344 - if the version can be inferred from the services, then the folder version will be version + 1" {
 			val version = Random.nextInt(10, 100)
-			val folder = medicationSchemeExport.callMakePatientFolder(
-				42,
-				Patient(id = uuid()),
-				null,
-				HealthcareParty(id = uuid()),
-				defaultConfig,
-				language = "en",
-				listOf(
-					Service(
-						id = uuid(),
-						content = mapOf(
-							"en" to Content(
-								medicationValue = Medication(
-									idOnSafes = uuid(),
-									medicationSchemeSafeVersion = version,
-									substanceProduct = Substanceproduct(
-										intendedname = uuid()
+			withAuthenticatedReactorContext(hcp) {
+				val folder = medicationSchemeExport.callMakePatientFolder(
+					42,
+					Patient(id = uuid()),
+					null,
+					HealthcareParty(id = uuid()),
+					defaultConfig,
+					language = "en",
+					listOf(
+						Service(
+							id = uuid(),
+							content = mapOf(
+								"en" to Content(
+									medicationValue = Medication(
+										idOnSafes = uuid(),
+										medicationSchemeSafeVersion = version,
+										substanceProduct = Substanceproduct(
+											intendedname = uuid()
+										)
 									)
 								)
 							)
 						)
-					)
-				),
-				null,
-				null
-			)
-			folder.transactions.first().version shouldBe "${version + 1}"
+					),
+					null,
+					null
+				)
+				folder.transactions.first().version shouldBe "${version + 1}"
+			}
+
 		}
 
 	}

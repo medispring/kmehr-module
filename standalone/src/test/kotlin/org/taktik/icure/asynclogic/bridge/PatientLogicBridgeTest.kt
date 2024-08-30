@@ -1,9 +1,10 @@
 package org.taktik.icure.asynclogic.bridge
 
-import io.icure.kraken.client.infrastructure.ClientException
+import com.icure.sdk.utils.RequestStatusException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.flow.count
@@ -11,17 +12,22 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.TestInstance
+import org.taktik.icure.asynclogic.bridge.mappers.PatientFilterMapper
+import org.taktik.icure.asynclogic.bridge.mappers.PatientMapper
 import org.taktik.icure.config.BridgeConfig
+import org.taktik.icure.domain.filter.impl.patient.PatientByHcPartyAndSsinFilter
+import org.taktik.icure.domain.filter.impl.patient.PatientByHcPartyDateOfBirthFilter
+import org.taktik.icure.domain.filter.impl.patient.PatientByHcPartyNameFilter
 import org.taktik.icure.entities.Patient
 import org.taktik.icure.security.jwt.JwtUtils
-import org.taktik.icure.services.external.rest.v2.mapper.PatientV2Mapper
 import org.taktik.icure.test.*
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PatientLogicBridgeTest(
     val bridgeConfig: BridgeConfig,
-    val patientMapper: PatientV2Mapper,
+    val patientMapper: PatientMapper,
+    val patientFilterMapper: PatientFilterMapper,
     val jwtUtils: JwtUtils
 ) : BaseKmehrTest() {
 
@@ -37,7 +43,8 @@ class PatientLogicBridgeTest(
             val patientBridge = PatientLogicBridge(
                 KmehrTestApplication.fakeSessionLogic,
                 bridgeConfig,
-                patientMapper
+                patientMapper,
+                patientFilterMapper
             )
 
             patientLogicBridgeTest(hcp, patientBridge)
@@ -87,7 +94,7 @@ private suspend fun StringSpec.patientLogicBridgeTest(
 
     "Trying to retrieve a non-existing Patient will result in a 404 Client exception" {
         withAuthenticatedReactorContext(credentials) {
-            shouldThrow<ClientException> { patientBridge.getPatient(uuid()) }.also {
+            shouldThrow<RequestStatusException> { patientBridge.getPatient(uuid()) }.also {
                 it.statusCode shouldBe 404
             }
         }
@@ -106,9 +113,11 @@ private suspend fun StringSpec.patientLogicBridgeTest(
             }
             patientBridge.createPatients(patients).count() shouldBe patients.size
 
-            val result = patientBridge.listByHcPartyAndSsinIdsOnly(
-                patients.first().ssin!!,
-                patients.first().delegations.keys.first()
+            val result = patientBridge.matchEntitiesBy(
+                PatientByHcPartyAndSsinFilter(
+                    ssin = patients.first().ssin!!,
+                    healthcarePartyId = patients.first().delegations.keys.first()
+                )
             ).toList()
             result.size shouldBe 1
             result.first() shouldBe patients.first().id
@@ -142,16 +151,25 @@ private suspend fun StringSpec.patientLogicBridgeTest(
                 }
             ).count() shouldBe 1000
 
-            patientBridge.listByHcPartyAndSsinIdsOnly(ssin, hcpId)
-                .onEach {
-                    correctPatientsId shouldContain it
-                }.count() shouldBe correctPatients.size
+            patientBridge.matchEntitiesBy(
+                PatientByHcPartyAndSsinFilter(
+                    ssin = ssin,
+                    healthcarePartyId = hcpId
+                )
+            ).onEach {
+                correctPatientsId shouldContain it
+            }.count() shouldBe correctPatients.size
         }
     }
 
     "When no Patient matches the HCP and SSIN filter, an empty result is returned" {
         withAuthenticatedReactorContext(credentials) {
-            patientBridge.listByHcPartyAndSsinIdsOnly(uuid(), credentials.dataOwnerId!!).count() shouldBe 0
+            patientBridge.matchEntitiesBy(
+                PatientByHcPartyAndSsinFilter(
+                    ssin = uuid(),
+                    healthcarePartyId = credentials.dataOwnerId.shouldNotBeNull()
+                )
+            ).count() shouldBe 0
         }
     }
 
@@ -169,9 +187,11 @@ private suspend fun StringSpec.patientLogicBridgeTest(
             }
             patientBridge.createPatients(patients).count() shouldBe 5
 
-            val result = patientBridge.listByHcPartyDateOfBirthIdsOnly(
-                patients.first().dateOfBirth!!,
-                patients.first().delegations.keys.first()
+            val result = patientBridge.matchEntitiesBy(
+                PatientByHcPartyDateOfBirthFilter(
+                    dateOfBirth = patients.first().dateOfBirth.shouldNotBeNull(),
+                    healthcarePartyId = patients.first().delegations.keys.first()
+                )
             ).toList()
             result.size shouldBe 1
             result.first() shouldBe patients.first().id
@@ -207,17 +227,25 @@ private suspend fun StringSpec.patientLogicBridgeTest(
                 }
             ).count() shouldBe 1000
 
-            patientBridge.listByHcPartyDateOfBirthIdsOnly(dateOfBirth, hcpId)
-                .onEach {
-                    correctPatientsId shouldContain it
-                }.count() shouldBe correctPatients.size
+            patientBridge.matchEntitiesBy(
+                PatientByHcPartyDateOfBirthFilter(
+                    dateOfBirth = dateOfBirth,
+                    healthcarePartyId = hcpId
+                )
+            ).onEach {
+                correctPatientsId shouldContain it
+            }.count() shouldBe correctPatients.size
         }
     }
 
     "When no Patient matches the HCP and date of birth filter, an empty result is returned" {
         withAuthenticatedReactorContext(credentials) {
-            patientBridge.listByHcPartyDateOfBirthIdsOnly(Random.nextInt(19000000, 20220000), credentials.dataOwnerId!!)
-                .count() shouldBe 0
+            patientBridge.matchEntitiesBy(
+                PatientByHcPartyDateOfBirthFilter(
+                    dateOfBirth = Random.nextInt(19000000, 20220000),
+                    healthcarePartyId = credentials.dataOwnerId.shouldNotBeNull()
+                )
+            ).count() shouldBe 0
         }
     }
 
@@ -264,18 +292,24 @@ private suspend fun StringSpec.patientLogicBridgeTest(
             patientBridge.createPatients(patients + correctPatients)
                 .count() shouldBe (patients.size + correctPatients.size)
 
-            patientBridge.listByHcPartyNameContainsFuzzyIdsOnly(name, credentials.dataOwnerId)
-                .onEach { patientId ->
-                    correctPatients.map { it.id } shouldContain patientId
-                }.count() shouldBe correctPatients.size
+            patientBridge.matchEntitiesBy(
+                PatientByHcPartyNameFilter(
+                    name = name,
+                    healthcarePartyId = credentials.dataOwnerId
+                )
+            ).onEach { patientId ->
+                correctPatients.map { it.id } shouldContain patientId
+            }.count() shouldBe correctPatients.size
         }
     }
 
     "When no Patient matches the HCP and fuzzy name filter, an empty result is returned" {
         withAuthenticatedReactorContext(credentials) {
-            patientBridge.listByHcPartyNameContainsFuzzyIdsOnly(
-                uuid().replace("-", ""),
-                credentials.dataOwnerId!!
+            patientBridge.matchEntitiesBy(
+                PatientByHcPartyNameFilter(
+                    name = uuid().replace("-", ""),
+                    healthcarePartyId = credentials.dataOwnerId
+                )
             ).count() shouldBe 0
         }
     }

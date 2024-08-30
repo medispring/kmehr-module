@@ -22,6 +22,7 @@ import org.taktik.icure.be.ehealth.logic.kmehr.getSignature
 import org.taktik.icure.be.ehealth.logic.kmehr.v20161201.KmehrExport
 import org.taktik.icure.config.KmehrConfiguration
 import org.taktik.icure.constants.ServiceStatus
+import org.taktik.icure.domain.filter.impl.service.ServiceByHcPartyTagCodeDateFilter
 import org.taktik.icure.entities.HealthElement
 import org.taktik.icure.entities.HealthcareParty
 import org.taktik.icure.entities.Patient
@@ -534,7 +535,14 @@ class SumehrExport(
 
         val serviceIds = hcPartyIds.flatMap { hcpId ->
             cdItems.flatMap { tagCode ->
-                contactLogic.listServiceIdsByTag(hcpId, sfks, "CD-ITEM", tagCode, null, null).toList()
+                contactLogic.matchEntitiesBy(
+                    ServiceByHcPartyTagCodeDateFilter(
+                        healthcarePartyId = hcpId,
+                        patientSecretForeignKeys = sfks,
+                        tagType = "CD-ITEM",
+                        tagCode = tagCode
+                    )
+                ).toList()
             }
         }
 

@@ -285,8 +285,8 @@ open class KmehrExport (
         lifecycle = LifecycleType().apply {
             cd = CDLIFECYCLE().apply {
                 s = "CD-LIFECYCLE"
-                value = if (ServiceStatus.isIrrelevant(svc.status)
-                    || ((svc.closingDate ?: 99999999) <= FuzzyValues.getCurrentFuzzyDateTime(ChronoUnit.DAYS))) {
+					value = if ((((FuzzyValues.getDateTime(svc.closingDate?.takeIf { it > 0 } ?: 99991231)
+                            ?: LocalDateTime.MAX) < LocalDateTime.now()))) {
                     CDLIFECYCLEvalues.INACTIVE
                 } else {
                     svc.tags.find { t -> t.type == "CD-LIFECYCLE" }?.let {
@@ -311,7 +311,7 @@ open class KmehrExport (
                 KmehrPrescriptionHelper.inferPeriodFromRegimen(med.regimen, med.frequency)?.let {
                     frequency = KmehrPrescriptionHelper.mapPeriodToFrequency(it)
                 }
-                duration = KmehrPrescriptionHelper.toDurationType(med.duration.takeIf { config.format == Config.Format.MEDICATIONSCHEME })
+                duration = KmehrPrescriptionHelper.toDurationType(med.duration.takeIf { config.format != Config.Format.MEDICATIONSCHEME })
                 med.regimen?.let { intakes ->
                     if (intakes.isNotEmpty()) {
                         regimen = ItemType.Regimen().apply {
