@@ -1112,5 +1112,53 @@
 		"codes": [
 			"dengue"
 		]
-	}
+	},
+  {
+    "cnk": "4916409",
+    "codes": ["seasonalinfluenza"]
+  },
+  {
+    "cnk": "4889275",
+    "codes": ["seasonalinfluenza"]
+  },
+  {
+    "cnk": "4889275",
+    "codes": ["seasonalinfluenza"]
+  },
+  {
+    "cnk": "4889218",
+    "codes": ["seasonalinfluenza"]
+  },
+  {
+    "cnk": "7746159",
+    "codes": ["seasonalinfluenza"]
+  },
+  {
+    "cnk": "7746167",
+    "codes": ["seasonalinfluenza"]
+  },
+  {
+    "cnk": "4969630",
+    "codes": ["covid19"]
+  },
+  {
+    "cnk": "4969648",
+    "codes": ["covid19"]
+  },
+  {
+    "cnk": "4969622",
+    "codes": ["covid19"]
+  },
+  {
+    "cnk": "4855128",
+    "codes": ["covid19"]
+  },
+  {
+    "cnk": "4855110",
+    "codes": ["covid19"]
+  },
+  {
+    "cnk": "4855144",
+    "codes": ["covid19"]
+  }
 ]
