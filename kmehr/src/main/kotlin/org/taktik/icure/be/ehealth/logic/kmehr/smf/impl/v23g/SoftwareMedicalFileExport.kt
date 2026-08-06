@@ -67,6 +67,11 @@ class SoftwareMedicalFileExport(
     private val documentMapper: DocumentMapper,
     private val healthElementMapper: HealthElementMapper,
 ) : KmehrExport(codeLogic, documentLogic, kmehrConfiguration) {
+    companion object {
+        private const val CONFIDENTIAL_NOTES_PARAMETER = "confidentialNoteIdByHcpIds"
+        private const val CONFIDENTIAL_NOTE_DN = "confidential-note"
+    }
+
     private var hesByContactId: Map<String?, List<HealthElement>> = mutableMapOf()
     private var servicesByContactId: Map<String?, List<Service>> = mutableMapOf()
     private var newestServicesById: MutableMap<String?, Service> = mutableMapOf()
@@ -805,8 +810,87 @@ class SoftwareMedicalFileExport(
             folder.transactions.add(it)
         }
 
+        if (config.format == Config.Format.SMF) {
+            exportConfidentialNoteForExporter(
+                folder = folder,
+                patient = patient,
+                healthcareParty = healthcareParty,
+                config = config,
+                decryptor = decryptor,
+                startIndex = startIndex,
+            )
+        }
+
         renumberKmehrIds(folder)
         return folder
+    }
+
+    /**
+     * Exports the private note of the exporting HCP when present on the patient parameters.
+     * Medispring stores entries as `{hcpId}:{documentId}` under CONFIDENTIAL_NOTES_PARAMETER.
+     * No matching entry or missing document → no-op. PMF must not call this.
+     */
+    private suspend fun exportConfidentialNoteForExporter(
+        folder: FolderType,
+        patient: Patient,
+        healthcareParty: HealthcareParty,
+        config: Config,
+        decryptor: AsyncDecrypt?,
+        startIndex: Int,
+    ) {
+        val documentId =
+            patient.parameters[CONFIDENTIAL_NOTES_PARAMETER]
+                ?.find { it.startsWith("${healthcareParty.id}:") }
+                ?.substringAfter(":", missingDelimiterValue = "")
+                ?.takeIf { it.isNotBlank() }
+                ?: return
+
+        try {
+            val document = documentLogic.getDocument(documentId) ?: return
+            val attachment = documentLogic.getAndDecryptMainAttachment(document.id)
+
+            folder.transactions.add(
+                TransactionType().apply {
+                    ids.add(idKmehr(startIndex + folder.transactions.size))
+                    ids.add(
+                        IDKMEHR().apply {
+                            s = IDKMEHRschemes.LOCAL
+                            sl = "MF-ID"
+                            sv = "1.0"
+                            value = document.id
+                        },
+                    )
+                    cds.add(
+                        CDTRANSACTION().apply {
+                            s = CDTRANSACTIONschemes.CD_TRANSACTION
+                            value = "note"
+                            dn = CONFIDENTIAL_NOTE_DN
+                        },
+                    )
+                    (document.modified ?: document.created)?.let {
+                        date = makeXGC(it)
+                        time = makeXGC(it)
+                    } ?: also {
+                        date = config.date
+                        time = makeXGC(0L)
+                    }
+                    author =
+                        AuthorType().apply {
+                            hcparties.add(checkHcpAndCreateCorrespondingPartyType(healthcareParty.id, emptyList()))
+                        }
+                    confidentiality =
+                        ConfidentialityType().apply {
+                            hcparties.add(checkHcpAndCreateCorrespondingPartyType(healthcareParty.id, emptyList()))
+                        }
+                    isIscomplete = true
+                    isIsvalidated = true
+                    recorddatetime = Utils.makeXGC(document.modified, true)
+                    headingsAndItemsAndTexts.add(makeMultimediaLnkType(document, attachment, decryptor))
+                },
+            )
+        } catch (e: Exception) {
+            log.error("Cannot export confidential note document $documentId", e)
+        }
     }
 
     /**

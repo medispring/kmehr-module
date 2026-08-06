@@ -120,6 +120,12 @@ class SoftwareMedicalFileImport(
 	private val insuranceLogic: InsuranceLogic,
 	private val idGenerator: UUIDGenerator,
 ) {
+	companion object {
+		private const val CONFIDENTIAL_NOTE_NAME = "confidential-note"
+		private const val CONFIDENTIAL_NOTE_TAG_TYPE = "CD-ITEM-EXT"
+		private const val CONFIDENTIAL_NOTE_TAG_CODE = "confidential-note"
+	}
+
 	private val defaultMapping: Map<String, List<ImportMapping>> =
 		ObjectMapper().let { om ->
 			val txt =
@@ -229,6 +235,7 @@ class SoftwareMedicalFileImport(
 
 	/**
 	 * Parses a transaction and creates an iCure Contact according to the Transaction Scheme code value.
+	 * Returns null when the transaction is a confidential note (handled as a standalone Document).
 	 * @param trn the TransactionType.
 	 * @param author the User responsible for the import.
 	 * @param res the ongoing ImportResult.
@@ -236,7 +243,7 @@ class SoftwareMedicalFileImport(
 	 * @param myMappings a map that elates MF-ID to ImportMappings.
 	 * @param saveToDatabase whether to save the new Contact to the db.
 	 * @param kmehrIndex the Kmehr Message Index.
-	 * @return a Contact
+	 * @return a Contact, or null for confidential notes
 	 */
 	private suspend fun parseTransaction(
 		trn: TransactionType,
@@ -246,58 +253,112 @@ class SoftwareMedicalFileImport(
 		myMappings: Map<String, List<ImportMapping>>,
 		saveToDatabase: Boolean,
 		kmehrIndex: KmehrMessageIndex,
-	): Contact =
-		when (trn.cds.find { it.s == CDTRANSACTIONschemes.CD_TRANSACTION }?.value) {
-			"contactreport" -> parseContactReport(trn, author, res, language, myMappings, saveToDatabase, kmehrIndex)
-			"clinicalsummary" ->
-				parseClinicalSummary(
-					trn,
-					author,
-					res,
-					language,
-					myMappings,
-					saveToDatabase,
-					kmehrIndex,
-				)
+	): Contact? {
+		val parsedContact: Contact? =
+			when (trn.cds.find { it.s == CDTRANSACTIONschemes.CD_TRANSACTION }?.value) {
+				"contactreport" -> parseContactReport(trn, author, res, language, myMappings, saveToDatabase, kmehrIndex)
+				"clinicalsummary" ->
+					parseClinicalSummary(
+						trn,
+						author,
+						res,
+						language,
+						myMappings,
+						saveToDatabase,
+						kmehrIndex,
+					)
 
-			"labresult", "result", "note", "prescription", "report" ->
-				parseDocumentInTransaction(
-					trn,
-					author,
-					res,
-					language,
-					myMappings,
-					saveToDatabase,
-					kmehrIndex,
-				)
-
-			"pharmaceuticalprescription" ->
-				parsePharmaceuticalPrescription(
-					trn,
-					author,
-					res,
-					language,
-					myMappings,
-					saveToDatabase,
-					kmehrIndex,
-				)
-
-			else -> parseGenericTransaction(trn, author, res, language, myMappings, saveToDatabase, kmehrIndex)
-		}.let { con ->
-			if (saveToDatabase) {
-				try {
-					contactLogic.createContact(con)
-				} catch (_: UpdateConflictException) {
-					contactLogic.createContact(
-						con.copy(
-							id = idGenerator.newGUID().toString(),
-						),
-					) // This happens when the Kmehr file is corrupted
+				"labresult", "result", "note", "prescription", "report" -> {
+					if (isConfidentialNoteTransaction(trn)) {
+						parseConfidentialNoteDocument(trn, author, res)
+						null
+					} else {
+						parseDocumentInTransaction(
+							trn,
+							author,
+							res,
+							language,
+							myMappings,
+							saveToDatabase,
+							kmehrIndex,
+						)
+					}
 				}
-			} else {
-				con
+
+				"pharmaceuticalprescription" ->
+					parsePharmaceuticalPrescription(
+						trn,
+						author,
+						res,
+						language,
+						myMappings,
+						saveToDatabase,
+						kmehrIndex,
+					)
+
+				else -> parseGenericTransaction(trn, author, res, language, myMappings, saveToDatabase, kmehrIndex)
 			}
+
+		if (parsedContact == null) return null
+
+		return if (saveToDatabase) {
+			try {
+				contactLogic.createContact(parsedContact)
+			} catch (_: UpdateConflictException) {
+				contactLogic.createContact(
+					parsedContact.copy(
+						id = idGenerator.newGUID().toString(),
+					),
+				) // This happens when the Kmehr file is corrupted
+			}
+		} else {
+			parsedContact
 		}
+	}
+
+	private fun isConfidentialNoteTransaction(trn: TransactionType): Boolean =
+		trn.cds.any { it.s == CDTRANSACTIONschemes.CD_TRANSACTION && it.value == "note" } &&
+			!trn.confidentiality?.hcparties.isNullOrEmpty()
+
+	/**
+	 * Imports a confidential private note as a standalone Document (no Contact).
+	 * Persistence and ignoreAutoDelegations are handled by the Medispring import layer.
+	 */
+	private fun parseConfidentialNoteDocument(
+		trn: TransactionType,
+		author: User,
+		v: ImportResult,
+	) {
+		val lnk =
+			trn.headingsAndItemsAndTexts
+				?.filterIsInstance<LnkType>()
+				?.firstOrNull { it.type == CDLNKvalues.MULTIMEDIA && it.url == null }
+				?: return
+
+		val documentId = idGenerator.newGUID().toString()
+		val (mainUti, otherUtis) = extractUtis(lnk)
+		val svcRecordDateTime =
+			trn.recorddatetime
+				?.toGregorianCalendar()
+				?.toInstant()
+				?.toEpochMilli()
+
+		v.attachments[documentId] = MimeAttachment(data = lnk.value)
+
+		v.documents.add(
+			Document(
+				id = documentId,
+				author = author.id,
+				responsible = author.healthcarePartyId,
+				created = svcRecordDateTime,
+				modified = svcRecordDateTime,
+				name = CONFIDENTIAL_NOTE_NAME,
+				mainUti = mainUti,
+				otherUtis = otherUtis,
+				tags = setOf(CodeStub.from(CONFIDENTIAL_NOTE_TAG_TYPE, CONFIDENTIAL_NOTE_TAG_CODE, "1")),
+			),
+		)
+	}
 
 	/**
 	 * Checks if all the patients in a SMF message exist in the db.
@@ -464,7 +525,7 @@ class SoftwareMedicalFileImport(
 												mappings,
 												saveToDatabase,
 												kmehrIndex,
-											).services
+											)?.services
 										} ?: setOf()
 								}?.toSet()
 						} ?: setOf()
@@ -780,7 +841,7 @@ class SoftwareMedicalFileImport(
 												mappings,
 												saveToDatabase,
 												kmehrIndex,
-											).services
+											)?.services
 										} ?: setOf()
 								}?.toSet()
 						} ?: setOf()
@@ -1065,7 +1126,7 @@ class SoftwareMedicalFileImport(
 											mappings,
 											saveToDatabase,
 											kmehrIndex,
-										).services
+										)?.services
 									} ?: setOf()
 								}?.toSet()
 						} ?: setOf()
