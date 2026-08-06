@@ -24,7 +24,6 @@ import org.taktik.couchdb.ViewRowNoDoc
 import org.taktik.couchdb.annotation.View
 import org.taktik.couchdb.dao.DesignDocumentProvider
 import org.taktik.couchdb.entity.ComplexKey
-import org.taktik.couchdb.id.IDGenerator
 import org.taktik.couchdb.queryView
 import org.taktik.couchdb.queryViewIncludeDocs
 import org.taktik.icure.asyncdao.CouchDbDispatcher
@@ -47,28 +46,32 @@ import kotlin.time.toJavaDuration
 @View(name = "all", map = "function(doc) { if (doc.java_type == 'org.taktik.icure.entities.samv2.Amp' && !doc.deleted) emit( null, doc._id )}")
 class AmpDAOImpl(
 	couchDbDispatcher: CouchDbDispatcher,
-	idGenerator: IDGenerator,
 	datastoreInstanceProvider: DatastoreInstanceProvider,
 	designDocumentProvider: DesignDocumentProvider
-) : InternalDAOImpl<Amp>(Amp::class.java, couchDbDispatcher, idGenerator, datastoreInstanceProvider, designDocumentProvider), AmpDAO {
+) : InternalDAOImpl<Amp>(
+	entityClass = Amp::class.java,
+	couchDbDispatcher = couchDbDispatcher,
+	datastoreInstanceProvider = datastoreInstanceProvider,
+	designDocumentProvider = designDocumentProvider
+), AmpDAO {
 
 	companion object {
 		const val ampPaginationLimit = 101
 	}
 
-    private val amppCache = Caffeine.newBuilder()
-        .maximumWeight(1_000_000)
-        .weigher { _: String, value: List<Pair<String, String>> -> value.size }
-        .expireAfterAccess(2.minutes.toJavaDuration())
-        .buildAsync<String, List<Pair<String, String>>>()
+	private val amppCache = Caffeine.newBuilder()
+		.maximumWeight(1_000_000)
+		.weigher { _: String, value: List<Pair<String, String>> -> value.size }
+		.expireAfterAccess(2.minutes.toJavaDuration())
+		.buildAsync<String, List<Pair<String, String>>>()
 
 	private val ampCache = Caffeine.newBuilder()
-        .maximumWeight(1_000_000)
-        .weigher { _: String, value: List<String> -> value.size }
-        .expireAfterAccess(2.minutes.toJavaDuration())
-        .buildAsync<String, List<String>>()
+		.maximumWeight(1_000_000)
+		.weigher { _: String, value: List<String> -> value.size }
+		.expireAfterAccess(2.minutes.toJavaDuration())
+		.buildAsync<String, List<String>>()
 
-    @View(name = "by_dmppcode", map = "classpath:js/amp/By_dmppcode.js")
+	@View(name = "by_dmppcode", map = "classpath:js/amp/By_dmppcode.js")
 	override fun findAmpsByDmppCode(datastoreInformation: IDatastoreInformation, dmppCode: String) = flow {
 		val client = couchDbDispatcher.getClient(datastoreInformation)
 		emitAll(
@@ -292,50 +295,50 @@ class AmpDAOImpl(
 		emitAll(client.queryView(viewQuery, ComplexKey::class.java, Int::class.java, Amp::class.java))
 	}
 
-    @View(name = "by_language_label_official_sort", map = "classpath:js/amp/By_language_label_official_sort.js", secondaryPartition = "official-sort")
-    override fun listAmpAmppIdsByLabel(
-        datastoreInformation: IDatastoreInformation,
-        language: String,
-        label: String
-    ): Flow<Pair<String, String>> = flow {
-        require(label.length >= 3) { "Label must be at least 3 characters long" }
-        val rowIds = coroutineScope {
-            //TODO check the relevance of using a SupervisorScope to avoid failure on parallel cancellation
-            //TODO Use Pair<Long,Long> for key (SHA) and it
-            //NOTE: the datastoreInformation always point to the same db and must not be part of the cache key
-            amppCache.get(label) { key, _ ->
-                future {
-                    val client = couchDbDispatcher.getClient(datastoreInformation)
-                    makeFromTo(key, language).let { (from, to) ->
-                        val viewQuery = createQuery("by_language_label_official_sort", "official-sort")
-                            .startKey(from)
-                            .endKey(to)
-                            .reduce(false)
-                            .limit(10001)
-                            .includeDocs(false)
-                        client.queryView<ComplexKey, AmppRef>(viewQuery)
-                            .mapNotNull { it.value?.let { value -> ViewRowNoDoc(it.id, it.key, AmppRef(
-                                value.vmpGroupName,
-                                value.index,
-                                value.name?.let { sanitizeForSorting(it) },
-                                value.ctiExtended)
-                            ) } }.toList()
-                            .also { if (it.size > 10000) throw TooManyResultsException("Too many results for label '$label', please provide a more precise label") }
-                            .sortedWith(compareBy({it.value?.vmpGroupName}, {it.value?.index}, {it.value?.name}))
-                            .mapNotNull { it.value?.ctiExtended?.let { ctiExtended -> it.id to ctiExtended } }
-                    }
-                }
-            }.await()
-        }
-        emitAll(rowIds.asFlow())    }
-
-
-    override fun listAmpIdsByLabel(datastoreInformation: IDatastoreInformation, language: String, label: String): Flow<String> = flow {
+	@View(name = "by_language_label_official_sort", map = "classpath:js/amp/By_language_label_official_sort.js", secondaryPartition = "official-sort")
+	override fun listAmpAmppIdsByLabel(
+		datastoreInformation: IDatastoreInformation,
+		language: String,
+		label: String
+	): Flow<Pair<String, String>> = flow {
 		require(label.length >= 3) { "Label must be at least 3 characters long" }
 		val rowIds = coroutineScope {
 			//TODO check the relevance of using a SupervisorScope to avoid failure on parallel cancellation
 			//TODO Use Pair<Long,Long> for key (SHA) and it
-            //NOTE: the datastoreInformation always point to the same db and must not be part of the cache key
+			//NOTE: the datastoreInformation always point to the same db and must not be part of the cache key
+			amppCache.get(label) { key, _ ->
+				future {
+					val client = couchDbDispatcher.getClient(datastoreInformation)
+					makeFromTo(key, language).let { (from, to) ->
+						val viewQuery = createQuery("by_language_label_official_sort", "official-sort")
+							.startKey(from)
+							.endKey(to)
+							.reduce(false)
+							.limit(10001)
+							.includeDocs(false)
+						client.queryView<ComplexKey, AmppRef>(viewQuery)
+							.mapNotNull { it.value?.let { value -> ViewRowNoDoc(it.id, it.key, AmppRef(
+								value.vmpGroupName,
+								value.index,
+								value.name?.let { sanitizeForSorting(it) },
+								value.ctiExtended)
+							) } }.toList()
+							.also { if (it.size > 10000) throw TooManyResultsException("Too many results for label '$label', please provide a more precise label") }
+							.sortedWith(compareBy({it.value?.vmpGroupName}, {it.value?.index}, {it.value?.name}))
+							.mapNotNull { it.value?.ctiExtended?.let { ctiExtended -> it.id to ctiExtended } }
+					}
+				}
+			}.await()
+		}
+		emitAll(rowIds.asFlow())	}
+
+
+	override fun listAmpIdsByLabel(datastoreInformation: IDatastoreInformation, language: String, label: String): Flow<String> = flow {
+		require(label.length >= 3) { "Label must be at least 3 characters long" }
+		val rowIds = coroutineScope {
+			//TODO check the relevance of using a SupervisorScope to avoid failure on parallel cancellation
+			//TODO Use Pair<Long,Long> for key (SHA) and it
+			//NOTE: the datastoreInformation always point to the same db and must not be part of the cache key
 			ampCache.get(label) { key, _ ->
 				future {
 					val client = couchDbDispatcher.getClient(datastoreInformation)
@@ -344,11 +347,11 @@ class AmpDAOImpl(
 							.startKey(from)
 							.endKey(to)
 							.reduce(false)
-                            .limit(10001)
+							.limit(10001)
 							.includeDocs(false)
 						client.queryView<ComplexKey, String>(viewQuery).map { ViewRowNoDoc(it.id, it.key, sanitizeForSorting(it.value)) }.toList()
-                            .also { if (it.size > 10000) throw TooManyResultsException("Too many results for label '$label', please provide a more precise label") }
-                            .sortedBy { it.value }.map { it.id }
+							.also { if (it.size > 10000) throw TooManyResultsException("Too many results for label '$label', please provide a more precise label") }
+							.sortedBy { it.value }.map { it.id }
 					}
 				}
 			}.await()
@@ -362,7 +365,7 @@ class AmppRefDeserializer : JsonDeserializer<AmppRef>() {
 		val array = p.codec.readTree<com.fasterxml.jackson.databind.node.ArrayNode>(p)
 		check(array.size() == 4) { "AmppRef array must have exactly 4 elements" }
 
-        val vmpGroupName = if (array[0].isNull) null else array[0].asText()
+		val vmpGroupName = if (array[0].isNull) null else array[0].asText()
 		val index = array[1].asDouble()
 		val name = if (array[2].isNull) null else array[2].asText()
 		val ctiExtended = if (array[3].isNull) null else array[3].asText()
@@ -373,8 +376,8 @@ class AmppRefDeserializer : JsonDeserializer<AmppRef>() {
 
 @JsonDeserialize(using = AmppRefDeserializer::class)
 data class AmppRef(
-    val vmpGroupName: String? = null,
-    val index: Double,
-    val name: String?,
-    val ctiExtended: String?
+	val vmpGroupName: String? = null,
+	val index: Double,
+	val name: String?,
+	val ctiExtended: String?
 )

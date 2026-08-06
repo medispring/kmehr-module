@@ -61,7 +61,8 @@ class BridgeAsyncSessionLogic(
 		session: WebSession?,
 		groupId: String?,
 		applicationId: String?,
-		scopeDataOwner: String?
+		scopeDataOwner: String?,
+		requestedSchemaVersion: Int?
 	): JwtAuthentication {
 		throw BridgeException()
 	}

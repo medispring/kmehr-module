@@ -117,13 +117,13 @@ subprojects {
 				force(coreLibs.springWebflux)
 				force(coreLibs.springdocCommon)
 
-				force("org.springframework.security:spring-security-core:6.5.9")
-				force("org.springframework:spring-jcl:6.2.17")
-				force("io.netty:netty-resolver:4.1.131.Final")
- 				force("io.netty:netty-resolver-dns-native-macos:4.1.131.Final")
+				force("io.netty:netty-resolver:4.1.124.Final")
+				force("io.netty:netty-resolver-dns-native-macos:4.1.122.Final")
 				force("co.touchlab:kermit:2.0.8")
-				force("com.nimbusds:nimbus-jose-jwt:9.37.4")
 				force("com.google.devtools.ksp:symbol-processing-api:2.2.0-2.0.2")
+				force("org.apache.httpcomponents:httpclient:4.5.14")
+				force("net.java.dev.jna:jna:5.13.0")
+				force("org.bouncycastle:bcprov-jdk18on:1.81")
 			}
 		}
 	}

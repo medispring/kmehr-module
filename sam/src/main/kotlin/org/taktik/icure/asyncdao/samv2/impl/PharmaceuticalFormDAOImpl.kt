@@ -6,7 +6,6 @@ package org.taktik.icure.asyncdao.samv2.impl
 
 import org.taktik.couchdb.annotation.View
 import org.taktik.couchdb.dao.DesignDocumentProvider
-import org.taktik.couchdb.id.IDGenerator
 import org.taktik.icure.asyncdao.CouchDbDispatcher
 import org.taktik.icure.asyncdao.impl.InternalDAOImpl
 import org.taktik.icure.asyncdao.samv2.PharmaceuticalFormDAO
@@ -14,19 +13,16 @@ import org.taktik.icure.datastore.DatastoreInstanceProvider
 import org.taktik.icure.entities.samv2.PharmaceuticalForm
 
 @View(
-    name = "all",
-    map = "function(doc) { if (doc.java_type == 'org.taktik.icure.entities.samv2.PharmaceuticalForm') emit( null, doc._id )}",
+	name = "all",
+	map = "function(doc) { if (doc.java_type == 'org.taktik.icure.entities.samv2.PharmaceuticalForm') emit( null, doc._id )}",
 )
 class PharmaceuticalFormDAOImpl(
-    couchDbDispatcher: CouchDbDispatcher,
-    idGenerator: IDGenerator,
-    datastoreInstanceProvider: DatastoreInstanceProvider,
-    designDocumentProvider: DesignDocumentProvider,
+	couchDbDispatcher: CouchDbDispatcher,
+	datastoreInstanceProvider: DatastoreInstanceProvider,
+	designDocumentProvider: DesignDocumentProvider,
 ) : InternalDAOImpl<PharmaceuticalForm>(
-        PharmaceuticalForm::class.java,
-        couchDbDispatcher,
-        idGenerator,
-        datastoreInstanceProvider,
-        designDocumentProvider,
-    ),
-    PharmaceuticalFormDAO
+	entityClass = PharmaceuticalForm::class.java,
+	couchDbDispatcher = couchDbDispatcher,
+	datastoreInstanceProvider = datastoreInstanceProvider,
+	designDocumentProvider = designDocumentProvider,
+), PharmaceuticalFormDAO

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kmehrmessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.ehealth.fgov.be/standards/kmehr/schema/v1"
+  xsi:schemaLocation="http://www.ehealth.fgov.be/standards/kmehr/schema/v1 ../20110701-kmehr/ehealth-kmehr/XSD/kmehr_elements.xsd">
+  <header>
+    <standard>
+      <cd S="CD-STANDARD" SV="1.7">20131001</cd>
+      <specialisation>
+        <cd S="CD-MESSAGE" SV="1.0">gppatientmigration</cd>
+        <version>1.0</version>
+      </specialisation>
+    </standard>
+    <id S="ID-KMEHR" SV="1.0">14798636004.b6b497cc-fc49-4b47-9b22-f3a98d24ebfc</id>
+    <date>2026-05-08</date>
+    <time>10:29:11</time>
+    <sender>
+      <hcparty>
+        <id S="LOCAL" SV="0.0" SL="Other">Other</id>
+        <cd S="CD-HCPARTY" SV="1.6">application</cd>
+        <name>Other </name>
+      </hcparty>
+      <hcparty>
+        <id S="ID-HCPARTY" SV="1.0">14798636004</id>
+        <id S="INSS" SV="1.0">83061133058</id>
+        <cd S="CD-HCPARTY" SV="1.6">persphysician</cd>
+        <firstname>test</firstname>
+        <familyname>test</familyname>
+        <address>
+          <cd S="CD-ADDRESS" SV="1.0">work</cd>
+          <country>
+            <cd S="CD-FED-COUNTRY" SV="1.0">be</cd>
+          </country>
+          <zip>1111</zip>
+          <city>test</city>
+          <street>test</street>
+          <housenumber>1</housenumber>
+          <postboxnumber>001</postboxnumber>
+        </address>
+        <telecom>
+          <cd S="CD-ADDRESS" SV="1.0">work</cd>
+          <cd S="CD-TELECOM" SV="1.0">phone</cd>
+          <telecomnumber></telecomnumber>
+        </telecom>
+      </hcparty>
+    </sender>
+    <recipient>
+      <hcparty>
+        <cd S="CD-HCPARTY" SV="1.6">perscaregiver</cd>
+        <firstname></firstname>
+        <familyname></familyname>
+        <telecom>
+          <cd S="CD-ADDRESS" SV="1.0">work</cd>
+          <cd S="CD-TELECOM" SV="1.0">phone</cd>
+          <telecomnumber></telecomnumber>
+        </telecom>
+      </hcparty>
+    </recipient>
+  </header>
+  <folder>
+    <id S="ID-KMEHR" SV="1.0">1</id>
+    <patient>
+      <id S="LOCAL" SV="1.0" SL="MF-ID">8470</id>
+      <id S="ID-PATIENT" SV="1.2">45102828485</id>
+      <firstname>test</firstname>
+      <familyname>test</familyname>
+      <birthdate>
+        <date>1945-10-28</date>
+      </birthdate>
+      <birthlocation>
+        <city>test</city>
+      </birthlocation>
+      <sex>
+        <cd S="CD-SEX" SV="1.0">female</cd>
+      </sex>
+      <address>
+        <cd S="CD-ADDRESS" SV="1.0">home</cd>
+        <country>
+          <cd S="CD-FED-COUNTRY" SV="1.0">be</cd>
+        </country>
+        <zip>1111</zip>
+        <city>test</city>
+        <street>test</street>
+        <housenumber>11</housenumber>
+      </address>
+      <telecom>
+        <cd S="CD-ADDRESS" SV="1.0">home</cd>
+        <cd S="CD-TELECOM" SV="1.0">mobile</cd>
+        <telecomnumber></telecomnumber>
+      </telecom>
+      <recorddatetime>2026-05-08T09:49:31</recorddatetime>
+    </patient>
+    <transaction>
+      <id S="ID-KMEHR" SV="1.0">1</id>
+      <id S="LOCAL" SV="1.0" SL="MF-ID">94029170-1d7c-42f8-a48d-2fe8f1ab1575</id>
+      <cd S="CD-TRANSACTION" SV="1.5">clinicalsummary</cd>
+      <date>2026-05-08</date>
+      <time>10:29:11</time>
+      <author>
+        <hcparty>
+          <id S="ID-HCPARTY" SV="1.0">14798636004</id>
+          <id S="INSS" SV="1.0">83061133058</id>
+          <cd S="CD-HCPARTY" SV="1.6">persphysician</cd>
+          <firstname>test</firstname>
+          <familyname>Vansevenant</familyname>
+          <address>
+            <cd S="CD-ADDRESS" SV="1.0">work</cd>
+            <country>
+              <cd S="CD-FED-COUNTRY" SV="1.0">be</cd>
+            </country>
+            <zip>3130</zip>
+            <city>Begijnendijk</city>
+            <street>Dorpsstraat</street>
+            <housenumber>4</housenumber>
+            <postboxnumber>001</postboxnumber>
+          </address>
+          <telecom>
+            <cd S="CD-ADDRESS" SV="1.0">work</cd>
+            <cd S="CD-TELECOM" SV="1.0">phone</cd>
+            <telecomnumber></telecomnumber>
+          </telecom>
+        </hcparty>
+      </author>
+      <iscomplete>true</iscomplete>
+      <isvalidated>true</isvalidated>
+      <item>
+        <id S="ID-KMEHR" SV="1.0">1</id>
+        <id S="LOCAL" SV="1.0" SL="MF-ID">72d40113-91d6-4a4c-9c40-b788edf331c2</id>
+        <cd S="CD-ITEM" SV="1.6">gmdmanager</cd>
+        <content>
+          <hcparty>
+            <id S="ID-HCPARTY" SV="1.0">10365035004</id>
+            <id S="INSS" SV="1.0">96110534843</id>
+            <cd S="CD-HCPARTY" SV="1.6">persphysician</cd>
+            <firstname>XXXX</firstname>
+            <familyname>XXXXXXX</familyname>
+            <address>
+              <cd S="CD-ADDRESS" SV="1.0">work</cd>
+              <country>
+                <cd S="CD-FED-COUNTRY" SV="1.0">be</cd>
+              </country>
+              <zip>3130</zip>
+              <city>Begijnendijk</city>
+              <street>Dorpsstraat</street>
+              <housenumber>4</housenumber>
+              <postboxnumber>1</postboxnumber>
+            </address>
+            <telecom>
+              <cd S="CD-ADDRESS" SV="1.0">work</cd>
+              <cd S="CD-TELECOM" SV="1.0">phone</cd>
+              <telecomnumber></telecomnumber>
+            </telecom>
+          </hcparty>
+        </content>
+        <content>
+          <date>2025-08-06</date>
+        </content>
+        <beginmoment>
+          <date>2025-08-06</date>
+        </beginmoment>
+        <recorddatetime>2026-01-14T13:33:08</recorddatetime>
+      </item>
+      <item>
+        <id S="ID-KMEHR" SV="1.0">2</id>
+        <id S="LOCAL" SV="0.0" SL="Other">12055166</id>
+        <id S="LOCAL" SV="1.0" SL="MF-ID">18adc600-0307-40d3-9af2-f3cc037fd790</id>
+        <cd S="CD-ITEM" SV="1.6">contactperson</cd>
+        <content>
+          <person>
+            <id S="LOCAL" SV="1.0" SL="MF-ID">12055166</id>
+            <firstname>Pascale</firstname>
+            <familyname>Vets</familyname>
+            <sex>
+              <cd S="CD-SEX" SV="1.0">unknown</cd>
+            </sex>
+          </person>
+        </content>
+        <recorddatetime>2025-08-06T14:37:07</recorddatetime>
+      </item>
+      <item>
+        <id S="ID-KMEHR" SV="1.0">3</id>
+        <id S="LOCAL" SV="1.0" SL="MF-ID">b62cb216-fbab-48eb-a89a-883a596fc04b</id>
+        <cd S="CD-ITEM" SV="1.6">insurancystatus</cd>
+        <content>
+          <insurance>
+            <id S="ID-INSURANCE" SV="1.1">304</id>
+            <membership>7127818281045</membership>
+            <cg1>131</cg1>
+            <cg2>131</cg2>
+          </insurance>
+        </content>
+      </item>
+      <item>
+        <id S="ID-KMEHR" SV="1.0">4</id>
+        <id S="LOCAL" SV="1.0" SL="MF-ID">81044e20-d8b2-4690-a806-d3d28c3f3ef7</id>
+        <cd S="CD-ITEM" SV="1.6">patientwill</cd>
+        <content>
+          <cd S="CD-PATIENTWILL" SV="1.1">intubationrefusal</cd>
+        </content>
+        <content>
+          <boolean>true</boolean>
+        </content>
+        <beginmoment>
+          <date>2026-04-08</date>
+        </beginmoment>
+        <recorddatetime>2026-04-08T15:28:59</recorddatetime>
+      </item>
+      <item>
+        <id S="ID-KMEHR" SV="1.0">5</id>
+        <id S="LOCAL" SV="1.0" SL="MF-ID">cf9e50ef-9692-4a75-95c8-e4bcbe5b4e10</id>
+        <cd S="CD-ITEM" SV="1.6">patientwill</cd>
+        <content>
+          <cd S="CD-PATIENTWILL" SV="1.1">ntbr</cd>
+        </content>
+        <content>
+          <boolean>false</boolean>
+        </content>
+        <beginmoment>
+          <date>2026-04-08</date>
+        </beginmoment>
+        <recorddatetime>2026-04-08T15:28:33</recorddatetime>
+      </item>
+      <item>
+        <id S="ID-KMEHR" SV="1.0">6</id>
+        <id S="LOCAL" SV="1.0" SL="MF-ID">6258ed3e-34f7-436a-9d46-4cd75d825481</id>
+        <cd S="CD-ITEM" SV="1.6">careplansubscription</cd>
+        <content>
+          <cd S="CD-CAREPATH" SV="1.1">001</cd>
+        </content>
+        <author>
+          <hcparty>
+            <id S="ID-HCPARTY" SV="1.0">10125032004</id>
+            <cd S="CD-HCPARTY" SV="1.6">perscaregiver</cd>
+            <firstname>Kimberly</firstname>
+            <familyname>Bruggeman</familyname>
+            <telecom>
+              <cd S="CD-ADDRESS" SV="1.0">work</cd>
+              <cd S="CD-TELECOM" SV="1.0">phone</cd>
+              <telecomnumber></telecomnumber>
+            </telecom>
+          </hcparty>
+        </author>
+        <beginmoment>
+          <date>2023-10-12</date>
+        </beginmoment>
+        <lifecycle>
+          <cd S="CD-LIFECYCLE" SV="1.6">active</cd>
+        </lifecycle>
+        <isrelevant>true</isrelevant>
+        <recorddatetime>2025-07-01T12:14:42</recorddatetime>
+      </item>
+      <item>
+        <id S="ID-KMEHR" SV="1.0">7</id>
+        <id S="LOCAL" SV="1.0" SL="MF-ID">71118868-e12c-4ae9-baeb-248841f71314</id>
+        <cd S="CD-ITEM" SV="1.6">careplansubscription</cd>
+        <content>
+          <cd S="CD-CAREPATH" SV="1.1">002</cd>
+        </content>
+        <author>
+          <hcparty>
+            <id S="ID-HCPARTY" SV="1.0">10125032004</id>
+            <cd S="CD-HCPARTY" SV="1.6">perscaregiver</cd>
+            <firstname>Kimberly</firstname>
+            <familyname>Bruggeman</familyname>
+            <telecom>
+              <cd S="CD-ADDRESS" SV="1.0">work</cd>
+              <cd S="CD-TELECOM" SV="1.0">phone</cd>
+              <telecomnumber></telecomnumber>
+            </telecom>
+          </hcparty>
+        </author>
+        <beginmoment>
+          <date>2023-10-12</date>
+        </beginmoment>
+        <lifecycle>
+          <cd S="CD-LIFECYCLE" SV="1.6">active</cd>
+        </lifecycle>
+        <isrelevant>true</isrelevant>
+        <recorddatetime>2025-07-01T12:14:42</recorddatetime>
+      </item>
+    </transaction>
+  </folder>
+</kmehrmessage>

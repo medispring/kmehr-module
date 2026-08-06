@@ -9,6 +9,7 @@ import org.taktik.icure.domain.filter.chain.FilterChain
 import org.taktik.icure.entities.base.Code
 import org.taktik.icure.entities.base.StoredDocument
 import org.taktik.icure.entities.conflicts.ConflictResolutionResult
+import org.taktik.icure.entities.conflicts.ConflictResolutionStrategy
 import org.taktik.icure.entities.conflicts.MergeResult
 import org.taktik.icure.entities.utils.ExternalFilterKey
 import org.taktik.icure.exceptions.BridgeException
@@ -20,7 +21,7 @@ open class GenericLogicBridge<E : StoredDocument> {
 		throw BridgeException()
 	}
 
-	fun solveConflicts(limit: Int?, ids: List<String>?): Flow<MergeResult> {
+	fun solveConflicts(limit: Int?, ids: List<String>?, strategy: ConflictResolutionStrategy): Flow<MergeResult> {
 		throw BridgeException()
 	}
 

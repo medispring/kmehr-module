@@ -61,4 +61,15 @@ dependencies {
 
     implementation(coreLibs.websocketCommons)
 
+    testImplementation(coreLibs.bundles.kotestLibs)
+    testImplementation(coreLibs.jupiter)
+    testImplementation(coreLibs.mockk)
+    testImplementation(coreLibs.kotlinxCoroutinesCore)
+}
+
+configurations.testRuntimeClasspath {
+    resolutionStrategy {
+        force("org.bouncycastle:bcprov-jdk18on:1.81.1")
+        force("net.bytebuddy:byte-buddy-agent:1.14.6")
+    }
 }

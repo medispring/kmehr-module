@@ -10,7 +10,6 @@ import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentHashMapOf
 import kotlinx.collections.immutable.plus
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
@@ -124,6 +123,15 @@ class SoftwareMedicalFileImport(
 		private const val CONFIDENTIAL_NOTE_NAME = "confidential-note"
 		private const val CONFIDENTIAL_NOTE_TAG_TYPE = "CD-ITEM-EXT"
 		private const val CONFIDENTIAL_NOTE_TAG_CODE = "confidential-note"
+
+		/**
+		 * Shallow normalization for name equality: lowercases every character (where possible) and
+		 * drops everything that is not a letter or a digit (spaces and punctuation are ignored).
+		 *
+		 * It is accent-sensitive: accented letters are case-folded but never stripped of their
+		 * diacritics, so e.g. "Beneét" and "Benéet" normalize to themselves and do not match "Beneet".
+		 */
+		internal fun shallowNormalizeName(value: String): String = value.lowercase().filter { it.isLetterOrDigit() }
 	}
 
 	private val defaultMapping: Map<String, List<ImportMapping>> =
@@ -2015,7 +2023,18 @@ class SoftwareMedicalFileImport(
 				p.familyname?.trim()?.let { it == "" } != false
 			) {
 				p.name
-					?.let { healthcarePartyLogic.listHealthcarePartiesByName(p.name).firstOrNull() }
+					?.trim()
+					?.takeIf { it.isNotEmpty() }
+					?.let { name ->
+						val normalizedName = shallowNormalizeName(name)
+						healthcarePartyLogic.listHealthcarePartiesByName(name).toList().firstOrNull { hcp ->
+							(hcp.firstName != null && hcp.lastName != null && (
+								shallowNormalizeName("${hcp.firstName}${hcp.lastName}") == normalizedName ||
+									shallowNormalizeName("${hcp.lastName}${hcp.firstName}") == normalizedName
+							)) || hcp.name?.let { shallowNormalizeName(it) == normalizedName } == true
+
+						}
+					}
 					?.also {
 						v.hcps.add(it) // do not create it, but should appear in patient external hcparties
 					}
@@ -2050,7 +2069,7 @@ class SoftwareMedicalFileImport(
 		hcp.copy(
 			firstName = hcp.firstName ?: p.firstname,
 			lastName = hcp.lastName ?: p.familyname,
-			name = hcp.name ?: p.name,
+            name = hcp.name ?: p.name?.trim()?.takeIf { it.isNotEmpty() },
 			ssin = hcp.ssin ?: p.ids.find { it.s == IDHCPARTYschemes.INSS }?.value,
 			nihii = hcp.nihii ?: p.ids.find { it.s == IDHCPARTYschemes.ID_HCPARTY }?.value,
 			speciality = hcp.speciality ?: p.cds.find { it.s == CDHCPARTYschemes.CD_HCPARTY }?.value,

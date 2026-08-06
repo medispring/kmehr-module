@@ -18,7 +18,6 @@ import org.taktik.couchdb.ViewRowWithDoc
 import org.taktik.couchdb.annotation.View
 import org.taktik.couchdb.dao.DesignDocumentProvider
 import org.taktik.couchdb.entity.ComplexKey
-import org.taktik.couchdb.id.IDGenerator
 import org.taktik.couchdb.queryView
 import org.taktik.couchdb.queryViewIncludeDocs
 import org.taktik.icure.asyncdao.CouchDbDispatcher
@@ -37,10 +36,14 @@ import kotlin.time.toJavaDuration
 @View(name = "all", map = "function(doc) { if (doc.java_type == 'org.taktik.icure.entities.samv2.Nmp' && !doc.deleted) emit( null, doc._id )}")
 class NmpDAOImpl(
 	couchDbDispatcher: CouchDbDispatcher,
-	idGenerator: IDGenerator,
 	datastoreInstanceProvider: DatastoreInstanceProvider,
 	designDocumentProvider: DesignDocumentProvider
-) : InternalDAOImpl<Nmp>(Nmp::class.java, couchDbDispatcher, idGenerator, datastoreInstanceProvider, designDocumentProvider), NmpDAO {
+) : InternalDAOImpl<Nmp>(
+	entityClass = Nmp::class.java,
+	couchDbDispatcher = couchDbDispatcher,
+	datastoreInstanceProvider = datastoreInstanceProvider,
+	designDocumentProvider = designDocumentProvider
+), NmpDAO {
 	val cache = Caffeine.newBuilder().maximumSize(1000).expireAfterAccess(1.minutes.toJavaDuration()).buildAsync<String, List<String>>()
 
 	@View(name = "by_language_label", map = "classpath:js/nmp/By_language_label.js")

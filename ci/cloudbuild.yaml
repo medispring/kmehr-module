@@ -57,8 +57,8 @@ steps:
 
   -   name: 'docker:24-git'
       entrypoint: 'sh'
-      args: [ '-c', 'docker build -f update.Dockerfile --build-arg="version=$(cat ./git.version)" --build-arg="gitUser=$$GIT_USERNAME" --build-arg="gitPwd=$$GIT_PASSWORD" -t ci:test .' ]
-      secretEnv: [ 'GIT_USERNAME', 'GIT_PASSWORD' ]
+      args: [ '-c', 'docker build -f update.Dockerfile --build-arg="version=$(cat ./git.version)" --build-arg="gitUser=$$GIT_USERNAME" --build-arg="gitPwd=$$GIT_PASSWORD" --build-arg="gpgKey=$$GIT_GPG_SIGNING_KEY" -t ci:test .' ]
+      secretEnv: [ 'GIT_USERNAME', 'GIT_PASSWORD', 'GIT_GPG_SIGNING_KEY' ]
 
 availableSecrets:
   secretManager:
@@ -70,6 +70,8 @@ availableSecrets:
       env: 'GIT_USERNAME'
     - versionName: projects/taktik-dev/secrets/ci-git-password/versions/1
       env: 'GIT_PASSWORD'
+    - versionName: projects/taktik-dev/secrets/ci-dev-icure-gh-gpg-sign-key/versions/1
+      env: 'GIT_GPG_SIGNING_KEY'
 
 options:
   pool:

@@ -15,7 +15,6 @@ import org.taktik.couchdb.Client
 import org.taktik.couchdb.ClientImpl
 import org.taktik.couchdb.dao.DesignDocumentProvider
 import org.taktik.couchdb.get
-import org.taktik.couchdb.id.IDGenerator
 import org.taktik.icure.asyncdao.CouchDbDispatcher
 import org.taktik.icure.asyncdao.samv2.impl.AmpDAOImpl
 import org.taktik.icure.datastore.DatastoreInstanceProvider
@@ -45,7 +44,6 @@ import java.net.URI
 class AmpMappingTest(
 	httpClient: WebClient,
 	objectMapper: ObjectMapper,
-	idGenerator: IDGenerator,
 	datastoreInstanceProvider: DatastoreInstanceProvider,
 	designDocumentProvider: DesignDocumentProvider,
 	private val ampV1Mapper: AmpMapper,
@@ -87,8 +85,17 @@ class AmpMappingTest(
 					false
 				}
 			if (credentialsAreValid) {
-				val ampDAO = AmpDAOImpl(dispatcher, idGenerator, datastoreInstanceProvider, designDocumentProvider)
-				val testAmpDAO = TestAmpDAO(ampDAO, dispatcher, idGenerator, datastoreInstanceProvider, designDocumentProvider)
+				val ampDAO = AmpDAOImpl(
+					couchDbDispatcher = dispatcher,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider
+				)
+				val testAmpDAO = TestAmpDAO(
+					ampDAO = ampDAO,
+					couchDbDispatcher = dispatcher,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider
+				)
 				testAmpMapping(testAmpDAO)
 			} else {
 				println("CouchDB credentials for drugs db are not valid")

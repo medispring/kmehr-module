@@ -24,7 +24,6 @@ data class SamUpdate(
 	@param:JsonProperty("_attachments") override val attachments: Map<String, Attachment>? = emptyMap(),
 	@param:JsonProperty("_revs_info") override val revisionsInfo: List<RevisionInfo>? = emptyList(),
 	@param:JsonProperty("_conflicts") override val conflicts: List<String>? = emptyList(),
-	@param:JsonProperty("rev_history") override val revHistory: Map<String, String>? = emptyMap()
 ) : StoredDocument {
 
 	enum class BundleType { Amps, NonMedicinals, Paragraphs, PharmaceuticalForms, Signatures, Substances, Verses, Vmps, VmpGroups }

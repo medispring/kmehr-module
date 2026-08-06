@@ -42,301 +42,283 @@ import org.taktik.icure.security.CouchDbCredentialsProvider
 @Configuration
 @Profile("sam")
 open class SamDaoConfig {
-    @Bean
-    open fun drugCouchDbDispatcher(
-        httpClient: WebClient,
-        objectMapper: ObjectMapper,
-        credentialsProvider: CouchDbCredentialsProvider,
-        samCouchDbProperties: SAMCouchDbProperties,
-        couchDbDispatcherProvider: CouchDbDispatcherProvider,
-    ) = couchDbDispatcherProvider.getDispatcher(
-        httpClient,
-        objectMapper,
-        "icure",
-        "drugs${samCouchDbProperties.suffix}",
-        credentialsProvider,
-        3,
-    )
+	@Bean
+	open fun drugCouchDbDispatcher(
+		httpClient: WebClient,
+		objectMapper: ObjectMapper,
+		credentialsProvider: CouchDbCredentialsProvider,
+		samCouchDbProperties: SAMCouchDbProperties,
+		couchDbDispatcherProvider: CouchDbDispatcherProvider,
+	) = couchDbDispatcherProvider.getDispatcher(
+		httpClient,
+		objectMapper,
+		"icure",
+		"drugs${samCouchDbProperties.suffix}",
+		credentialsProvider,
+		3,
+	)
 
-    // Only instantiate if there is a next version suffix
-    @ConditionalOnProperty(prefix = "icure.couchdb.sam", name = ["nextVersionSuffix"], matchIfMissing = false)
-    @Bean
-    open fun drugNextVersionCouchDbDispatcher(
-        httpClient: WebClient,
-        objectMapper: ObjectMapper,
-        credentialsProvider: CouchDbCredentialsProvider,
-        samCouchDbProperties: SAMCouchDbProperties,
-        couchDbDispatcherProvider: CouchDbDispatcherProvider,
-    ) = couchDbDispatcherProvider.getDispatcher(
-        httpClient,
-        objectMapper,
-        "icure",
-        "drugs${samCouchDbProperties.nextVersionSuffix}",
-        credentialsProvider,
-        3,
-    )
+	// Only instantiate if there is a next version suffix
+	@ConditionalOnProperty(prefix = "icure.couchdb.sam", name = ["nextVersionSuffix"], matchIfMissing = false)
+	@Bean
+	open fun drugNextVersionCouchDbDispatcher(
+		httpClient: WebClient,
+		objectMapper: ObjectMapper,
+		credentialsProvider: CouchDbCredentialsProvider,
+		samCouchDbProperties: SAMCouchDbProperties,
+		couchDbDispatcherProvider: CouchDbDispatcherProvider,
+	) = couchDbDispatcherProvider.getDispatcher(
+		httpClient,
+		objectMapper,
+		"icure",
+		"drugs${samCouchDbProperties.nextVersionSuffix}",
+		credentialsProvider,
+		3,
+	)
 
-    @Bean
-    open fun chapIVCouchDbDispatcher(
-        httpClient: WebClient,
-        objectMapper: ObjectMapper,
-        credentialsProvider: CouchDbCredentialsProvider,
-        samCouchDbProperties: SAMCouchDbProperties,
-        couchDbDispatcherProvider: CouchDbDispatcherProvider,
-    ) = couchDbDispatcherProvider.getDispatcher(
-        httpClient,
-        objectMapper,
-        "icure",
-        "chapiv${samCouchDbProperties.suffix}",
-        credentialsProvider,
-        3,
-    )
+	@Bean
+	open fun chapIVCouchDbDispatcher(
+		httpClient: WebClient,
+		objectMapper: ObjectMapper,
+		credentialsProvider: CouchDbCredentialsProvider,
+		samCouchDbProperties: SAMCouchDbProperties,
+		couchDbDispatcherProvider: CouchDbDispatcherProvider,
+	) = couchDbDispatcherProvider.getDispatcher(
+		httpClient,
+		objectMapper,
+		"icure",
+		"chapiv${samCouchDbProperties.suffix}",
+		credentialsProvider,
+		3,
+	)
 
-    // Only instantiate if there is a next version suffix
-    @ConditionalOnProperty(prefix = "icure.couchdb.sam", name = ["nextVersionSuffix"], matchIfMissing = false)
-    @Bean
-    open fun chapIVNextVersionCouchDbDispatcher(
-        httpClient: WebClient,
-        objectMapper: ObjectMapper,
-        credentialsProvider: CouchDbCredentialsProvider,
-        samCouchDbProperties: SAMCouchDbProperties,
-        couchDbDispatcherProvider: CouchDbDispatcherProvider,
-    ) = couchDbDispatcherProvider.getDispatcher(
-        httpClient,
-        objectMapper,
-        "icure",
-        "chapiv${samCouchDbProperties.nextVersionSuffix}",
-        credentialsProvider,
-        3,
-    )
+	// Only instantiate if there is a next version suffix
+	@ConditionalOnProperty(prefix = "icure.couchdb.sam", name = ["nextVersionSuffix"], matchIfMissing = false)
+	@Bean
+	open fun chapIVNextVersionCouchDbDispatcher(
+		httpClient: WebClient,
+		objectMapper: ObjectMapper,
+		credentialsProvider: CouchDbCredentialsProvider,
+		samCouchDbProperties: SAMCouchDbProperties,
+		couchDbDispatcherProvider: CouchDbDispatcherProvider,
+	) = couchDbDispatcherProvider.getDispatcher(
+		httpClient,
+		objectMapper,
+		"icure",
+		"chapiv${samCouchDbProperties.nextVersionSuffix}",
+		credentialsProvider,
+		3,
+	)
 
-    @Bean
-    open fun ampDao(
-        @Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-    ): AmpDAO =
-        AmpDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-        )
+	@Bean
+	open fun ampDao(
+		@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+	): AmpDAO =
+		AmpDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+		)
 
-    @Bean
-    open fun nmpDao(
-        @Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-    ): NmpDAO =
-        NmpDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-        )
+	@Bean
+	open fun nmpDao(
+		@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+	): NmpDAO =
+		NmpDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+		)
 
-    @Bean
-    open fun vmpDao(
-        @Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-    ): VmpDAO =
-        VmpDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-        )
+	@Bean
+	open fun vmpDao(
+		@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+	): VmpDAO =
+		VmpDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+		)
 
-    @Bean
-    open fun vmpGroupDao(
-        @Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-    ): VmpGroupDAO =
-        VmpGroupDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-        )
+	@Bean
+	open fun vmpGroupDao(
+		@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+	): VmpGroupDAO =
+		VmpGroupDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+		)
 
-    @Bean
-    open fun verseDao(
-        @Qualifier("chapIVCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-    ): VerseDAO =
-        VerseDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-        )
+	@Bean
+	open fun verseDao(
+		@Qualifier("chapIVCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+	): VerseDAO =
+		VerseDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+		)
 
-    @Bean
-    open fun paragraphDao(
-        @Qualifier("chapIVCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-        ampDao: AmpDAO,
-    ): ParagraphDAO =
-        ParagraphDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-            ampDAO = ampDao,
-        )
+	@Bean
+	open fun paragraphDao(
+		@Qualifier("chapIVCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+		ampDao: AmpDAO,
+	): ParagraphDAO =
+		ParagraphDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+			ampDAO = ampDao,
+		)
 
-    @Bean
-    open fun pharmaceuticalFormDao(
-        @Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-    ): PharmaceuticalFormDAO =
-        PharmaceuticalFormDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-        )
+	@Bean
+	open fun pharmaceuticalFormDao(
+		@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+	): PharmaceuticalFormDAO =
+		PharmaceuticalFormDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+		)
 
-    @Bean
-    open fun substanceDao(
-        @Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-    ): SubstanceDAO =
-        SubstanceDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-        )
+	@Bean
+	open fun substanceDao(
+		@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+	): SubstanceDAO =
+		SubstanceDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+		)
 
-    @Bean
-    open fun productIdDao(
-        @Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-    ): ProductIdDAO =
-        ProductIdDAOImpl(
-            couchDbDispatcher = couchDbDispatcher,
-            idGenerator = idGenerator,
-            datastoreInstanceProvider = datastoreInstanceProvider,
-            designDocumentProvider = designDocumentProvider,
-        )
+	@Bean
+	open fun productIdDao(
+		@Qualifier("drugCouchDbDispatcher") couchDbDispatcher: CouchDbDispatcher,
+		idGenerator: IDGenerator,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+	): ProductIdDAO =
+		ProductIdDAOImpl(
+			couchDbDispatcher = couchDbDispatcher,
+			datastoreInstanceProvider = datastoreInstanceProvider,
+			designDocumentProvider = designDocumentProvider,
+		)
 
-    @Bean
-    @ConditionalOnProperty(name = ["icure.sam.updaterUrl"], matchIfMissing = false)
-    open fun samV2Updater(
-        @Qualifier("drugCouchDbDispatcher") drugsCouchDbDispatcher: CouchDbDispatcher,
-        @Qualifier("drugNextVersionCouchDbDispatcher") drugNextVersionCouchDbDispatcher: CouchDbDispatcher?,
-        @Qualifier("chapIVCouchDbDispatcher") chapIVCouchDbDispatcher: CouchDbDispatcher,
-        @Qualifier("chapIVNextVersionCouchDbDispatcher") chapIVNextVersionCouchDbDispatcher: CouchDbDispatcher?,
-        ampDAO: AmpDAO,
-        vmpDAO: VmpDAO,
-        vmpGroupDAO: VmpGroupDAO,
-        nmpDAO: NmpDAO,
-        paragraphDAO: ParagraphDAO,
-        pharmaceuticalFormDAO: PharmaceuticalFormDAO,
-        substanceDAO: SubstanceDAO,
-        verseDAO: VerseDAO,
-        updatesBridge: UpdatesBridge,
-        idGenerator: IDGenerator,
-        datastoreInstanceProvider: DatastoreInstanceProvider,
-        designDocumentProvider: DesignDocumentProvider,
-        samCouchDbProperties: SAMCouchDbProperties,
-    ) = drugNextVersionCouchDbDispatcher?.let { cdd ->
-        checkNotNull(chapIVNextVersionCouchDbDispatcher) { "chapIVNextVersionCouchDbDispatcher should not be null" }
-        val ampDAO =
-            AmpDAOImpl(
-                cdd,
-                idGenerator,
-                datastoreInstanceProvider,
-                designDocumentProvider,
-            )
-        runBlocking {
-            SamV2Updater(
-                cdd,
-                ampDAO.apply { forceInitStandardDesignDocument(true) },
-                VmpDAOImpl(
-                    cdd,
-                    idGenerator,
-                    datastoreInstanceProvider,
-                    designDocumentProvider,
-                ).apply { forceInitStandardDesignDocument(true) },
-                VmpGroupDAOImpl(
-                    cdd,
-                    idGenerator,
-                    datastoreInstanceProvider,
-                    designDocumentProvider,
-                ).apply { forceInitStandardDesignDocument(true) },
-                NmpDAOImpl(
-                    cdd,
-                    idGenerator,
-                    datastoreInstanceProvider,
-                    designDocumentProvider,
-                ).apply { forceInitStandardDesignDocument(true) },
-                ParagraphDAOImpl(
-                    chapIVNextVersionCouchDbDispatcher,
-                    idGenerator,
-                    datastoreInstanceProvider,
-                    designDocumentProvider,
-                    ampDAO,
-                ).apply { forceInitStandardDesignDocument(true) },
-                PharmaceuticalFormDAOImpl(cdd, idGenerator, datastoreInstanceProvider, designDocumentProvider).apply {
-                    forceInitStandardDesignDocument(true)
-                },
-                SubstanceDAOImpl(
-                    cdd,
-                    idGenerator,
-                    datastoreInstanceProvider,
-                    designDocumentProvider,
-                ).apply { forceInitStandardDesignDocument(true) },
-                VerseDAOImpl(
-                    chapIVNextVersionCouchDbDispatcher,
-                    idGenerator,
-                    datastoreInstanceProvider,
-                    designDocumentProvider,
-                ).apply { forceInitStandardDesignDocument(true) },
-                SamUpdateDAOImpl(
-                    cdd,
-                    idGenerator,
-                    datastoreInstanceProvider,
-                    designDocumentProvider,
-                ).apply { forceInitStandardDesignDocument(true) },
-                updatesBridge,
-                datastoreInstanceProvider,
-            )
-        }
-    } ?: runBlocking {
-        SamV2Updater(
-            drugsCouchDbDispatcher,
-            ampDAO,
-            vmpDAO,
-            vmpGroupDAO,
-            nmpDAO,
-            paragraphDAO,
-            pharmaceuticalFormDAO,
-            substanceDAO,
-            verseDAO,
-            SamUpdateDAOImpl(drugsCouchDbDispatcher, idGenerator, datastoreInstanceProvider, designDocumentProvider).apply {
-                forceInitStandardDesignDocument(true)
-            },
-            updatesBridge,
-            datastoreInstanceProvider,
-        )
-    }
+	@Bean
+	@ConditionalOnProperty(name = ["icure.sam.updaterUrl"], matchIfMissing = false)
+	open fun samV2Updater(
+		@Qualifier("drugCouchDbDispatcher") drugsCouchDbDispatcher: CouchDbDispatcher,
+		@Qualifier("drugNextVersionCouchDbDispatcher") drugNextVersionCouchDbDispatcher: CouchDbDispatcher?,
+		@Qualifier("chapIVCouchDbDispatcher") chapIVCouchDbDispatcher: CouchDbDispatcher,
+		@Qualifier("chapIVNextVersionCouchDbDispatcher") chapIVNextVersionCouchDbDispatcher: CouchDbDispatcher?,
+		ampDAO: AmpDAO,
+		vmpDAO: VmpDAO,
+		vmpGroupDAO: VmpGroupDAO,
+		nmpDAO: NmpDAO,
+		paragraphDAO: ParagraphDAO,
+		pharmaceuticalFormDAO: PharmaceuticalFormDAO,
+		substanceDAO: SubstanceDAO,
+		verseDAO: VerseDAO,
+		updatesBridge: UpdatesBridge,
+		datastoreInstanceProvider: DatastoreInstanceProvider,
+		designDocumentProvider: DesignDocumentProvider,
+		samCouchDbProperties: SAMCouchDbProperties,
+	) = drugNextVersionCouchDbDispatcher?.let { cdd ->
+		checkNotNull(chapIVNextVersionCouchDbDispatcher) { "chapIVNextVersionCouchDbDispatcher should not be null" }
+		val ampDAO =
+			AmpDAOImpl(
+				couchDbDispatcher = cdd,
+				datastoreInstanceProvider = datastoreInstanceProvider,
+				designDocumentProvider = designDocumentProvider,
+			)
+		runBlocking {
+			SamV2Updater(
+				cdd,
+				ampDAO.apply { forceInitStandardDesignDocument(true) },
+				VmpDAOImpl(
+					couchDbDispatcher = cdd,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider,
+				).apply { forceInitStandardDesignDocument(true) },
+				VmpGroupDAOImpl(
+					couchDbDispatcher = cdd,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider,
+				).apply { forceInitStandardDesignDocument(true) },
+				NmpDAOImpl(
+					couchDbDispatcher = cdd,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider,
+				).apply { forceInitStandardDesignDocument(true) },
+				ParagraphDAOImpl(
+					couchDbDispatcher = chapIVNextVersionCouchDbDispatcher,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider,
+					ampDAO = ampDAO,
+				).apply { forceInitStandardDesignDocument(true) },
+				PharmaceuticalFormDAOImpl(
+					couchDbDispatcher = cdd,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider
+				).apply {
+					forceInitStandardDesignDocument(true)
+				},
+				SubstanceDAOImpl(
+					couchDbDispatcher = cdd,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider,
+				).apply { forceInitStandardDesignDocument(true) },
+				VerseDAOImpl(
+					couchDbDispatcher = chapIVNextVersionCouchDbDispatcher,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider,
+				).apply { forceInitStandardDesignDocument(true) },
+				SamUpdateDAOImpl(
+					couchDbDispatcher = cdd,
+					datastoreInstanceProvider = datastoreInstanceProvider,
+					designDocumentProvider = designDocumentProvider,
+				).apply { forceInitStandardDesignDocument(true) },
+				updatesBridge,
+				datastoreInstanceProvider,
+			)
+		}
+	} ?: runBlocking {
+		SamV2Updater(
+			drugsCouchDbDispatcher,
+			ampDAO,
+			vmpDAO,
+			vmpGroupDAO,
+			nmpDAO,
+			paragraphDAO,
+			pharmaceuticalFormDAO,
+			substanceDAO,
+			verseDAO,
+			SamUpdateDAOImpl(
+				couchDbDispatcher = drugsCouchDbDispatcher,
+				datastoreInstanceProvider = datastoreInstanceProvider,
+				designDocumentProvider = designDocumentProvider
+			).apply {
+				forceInitStandardDesignDocument(true)
+			},
+			updatesBridge,
+			datastoreInstanceProvider,
+		)
+	}
 }
