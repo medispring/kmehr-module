@@ -317,7 +317,7 @@ class SoftwareMedicalFileImport(
 					parsedContact.copy(
 						id = idGenerator.newGUID().toString(),
 					),
-				) // This happens when the Kmehr file is corrupted
+				)
 			}
 		} else {
 			parsedContact
